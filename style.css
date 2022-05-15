@@ -1,0 +1,57 @@
+body, html{
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    display: flex;
+    justify-content: center;
+}
+
+.orderTable{
+    width: 300px;
+    margin-top: 20px;
+    border-radius: 13px;
+    background: #e0e0e05e;
+    box-shadow:  0px 0px 20px #5a5a5a;
+    position: relative;
+}
+
+.orderTable thead th{
+    padding: 10px;
+}
+.orderTable tbody td{
+    height: 0px;
+    padding: 10px;
+}
+
+.alert{ 
+    width: 0px;
+    color: white;
+    height: 15px;
+    position:absolute;
+    top: 200px;
+    left: 50%;
+    transform: translate(-50%, 0);
+    background: transparent;
+    padding: 7px 0px 7px 0px;
+    font-size: 17px;
+    border: 0px;
+    border-radius: 10px;
+    box-shadow:  0px 0px 10px #5a5a5a;
+    text-align: center;
+    overflow: hidden;
+    animation: show 3s forwards;
+}
+
+@keyframes show {
+    0%{
+        width: 0px;
+    }
+	50% {
+        width:100%;
+    }
+    100%{
+        width: 0;
+    }
+}
