@@ -68,9 +68,9 @@ window.onload = function(){
     let initSuccess = initSocket();
     
     // 4. 若初始化成功, 打开websoket连接直播间
-    /* if(initSuccess){
+    if(initSuccess){
         openWebSocket();
-    } */
+    }
 }
 
 /* 初始化播放器对象 */
