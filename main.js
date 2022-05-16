@@ -5,7 +5,7 @@ var config = {
     userOrder: 3,
     
     // 最大点歌数限制
-    maxOrder: 20,
+    maxOrder: 10,
     
     // 空闲歌单信息
     songListId: 0, 
@@ -68,9 +68,9 @@ window.onload = function(){
     let initSuccess = initSocket();
     
     // 4. 若初始化成功, 打开websoket连接直播间
-    if(initSuccess){
+    /* if(initSuccess){
         openWebSocket();
-    }
+    } */
 }
 
 /* 初始化播放器对象 */
@@ -95,6 +95,7 @@ function initPlayer(){
             <td>${order.song.sartist}</td>
             <td>${order.uname}</td></td>`
         this.elem.appendChild(tr);
+        
     }
     // 播放歌曲方法
     player.play = async function(songId){
@@ -107,22 +108,29 @@ function initPlayer(){
     }
     // 播放下一首方法
     player.playNext = function(){
-        // 播放下一首时删除第一首歌曲
-        this.orderList.shift();
-        this.elem.firstChild.remove();   
-        // 播放下一首歌曲
-        if(this.orderList.length > 0){
-            // 如果点歌列表不为空, 则播放当前第一首歌曲
-            this.play(this.orderList[0].song.sid)
-        }else if(this.freeList.length > 0){
-            // 如果点歌列表为空, 则根据空闲歌单索引 播放 空闲列表歌曲
-            if(this.freeIndex > this.freeList.length){
-                this.freeIndex = 0;
+        // 点歌列表只有一首或者没有歌曲时，播放空闲歌单的歌曲
+        if(this.orderList.length <= 1){
+            // 点歌列表无可播放的下一首歌曲，则播放空闲歌单的歌曲
+            if(this.freeList.length > 0){
+                if(this.freeIndex > this.freeList.length){
+                    this.freeIndex = 0;
+                }
+                let freeOrder = {
+                    uid:0,
+                    uname: "空闲歌单",
+                    song: this.freeList[this.freeIndex++]
+                }
+                this.addOrder(freeOrder);
+                this.play(this.orderList[0].sid);
+            }else{
+                musicMethod.pageAlert("当前无可播放的下一首歌曲");
             }
-            this.play(this.freeList[this.freeIndex++].sid);
-        }else{
-            // 如果都为空, 输出提示信息
-            musicMethod.pageAlert("当前无可播放的歌曲!");
+        }else {
+            // 播放下一首时删除第一首歌曲
+            this.orderList.shift();
+            this.elem.firstElementChild.remove();
+            // 播放删除后的当前第一首歌曲
+            this.play(this.orderList[0].song.sid)
         }
     }
 
@@ -131,6 +139,7 @@ function initPlayer(){
         player.playNext();
     });
     console.log("播放器已初始化!");
+    musicMethod.pageAlert("播放器已初始化!");
 }
 
 /* 加载全局配置 */
@@ -149,6 +158,7 @@ function loadGlobalConfig(){
         }
     }
     console.log("已加载全局配置!");
+    musicMethod.pageAlert("已加载全局配置!");
 }
 
 /* 初始化socket对象 */
@@ -163,11 +173,23 @@ function initSocket(){
     webSocket.url = "wss://broadcastlv.chat.bilibili.com:2245/sub";
 
     // 设置房间id
-    webSocket.roomId = 22811879;
+    let URLParam = window.location.search.substring(1).split('&');
+    URLParam.forEach(str => {
+        let param = str.split('=');
+        if(param.length == 2 && param[0].toLocaleUpperCase() == "ROOMID"){
+            webSocket.roomId = parseInt(param[1]);
+            musicMethod.pageAlert("直播间ID =" + webSocket.roomId);
+        }
+    });
+
+    if(!webSocket.roomId){
+        musicMethod.pageAlert("未获取到直播间ID");
+        return false;
+    }
 
     // 设置鉴权包 
     let authInfo = {
-        'uid': 0,
+        'uid': 22811879,
         'roomid': parseInt(webSocket.roomId, 10),
         'protover': 2,
         'platform': 'web',
@@ -181,6 +203,7 @@ function initSocket(){
     webSocket.heartPacket = packetMethod.createPacket(heartInfo, 1, 2, 1);
 
     console.log("已初始化webSocket连接!");
+    musicMethod.pageAlert("已初始化webSocket连接!");
     return true;
 }
 
@@ -205,7 +228,8 @@ function openWebSocket(){
 
     // 1. 连接打开事件
     socket.onopen = function () {
-        console.log("连接已打开");
+        console.log("弹幕服务器连接已打开");
+        musicMethod.pageAlert("弹幕服务器连接已打开");
         // 发送连接信息 
         socket.send(webSocket.authPacket);
         socket.send(webSocket.heartPacket);
@@ -239,8 +263,8 @@ function openWebSocket(){
     socket.onclose = function () {
         // 停止发送心跳包
         clearInterval(webSocket.timer);
-        musicMethod.pageAlert("连接已关闭!");
-        console.log("连接已关闭!");
+        musicMethod.pageAlert("弹幕服务器连接已关闭!");
+        console.log("弹幕服务器连接已关闭!");
     };
 
     // 4. 连接错误事件
@@ -256,36 +280,40 @@ function openWebSocket(){
     @param: userDanmu 包括用户id、用户名、用户弹幕
 */
 async function identifyDanmuCommand(userDanmu){
-    // console.log(userDanmu);
     let danmu = userDanmu.danmu.trim();
     // 点歌命令，触发点歌流程
     if (danmu.length >= 4 && danmu.slice(0, 2) == "点歌" && musicMethod.checkUser(userDanmu.uid)) {
         // 1. 提取歌名、歌手
         let songName = musicMethod.getSongName(danmu);
         let songArtist = musicMethod.getSongArtist(danmu);
-
-        // 2. 通过API查询歌曲信息（歌曲id、歌名、歌手）
+        
+        // 2. 通过API查询歌曲信息（歌曲id、歌名、歌手）   
         let song = await musicServer.getSongInfo(songName, songArtist);
-
-        // 3. 封装点歌信息
-        let order = {
-            uid: userDanmu.uid,
-            uname: userDanmu.uname,
-            song: song
-        }
-        // 判断配置的限制条件
-        if(musicMethod.checkOrder(order)){
+        
+        
+        if(song){
+            // 3. 封装点歌信息
+            let order = {
+                uid: userDanmu.uid,
+                uname: userDanmu.uname,
+                song: song
+            }
             // 4. 添加点歌信息到点歌列表
-            player.addOrder(order);
+            if(musicMethod.checkOrder(order)){   
+                player.addOrder(order);
+            }
+            
+            // 5. 如果当前播放没有播放歌曲，则开始播放第一首歌
+            if(player.audio.paused){
+                player.play(player.orderList[0].song.sid);
+            }
+        }else{
+            musicMethod.pageAlert("未查询到该歌曲!(ಥ_ಥ)");
         }
         
-        // 5. 如果当前播放没有播放歌曲，则开始播放第一首歌
-        if(player.audio.paused){
-            player.play(player.orderList[0].song.sid);
-        }
     }
     // 切歌命令，触发切歌流程
-    else if (danmu == "切歌") {
+    else if (player.orderList.length > 0 && player.orderList[0].uid == userDanmu.uid && danmu == "切歌") {
         // 播放下一首歌曲
         player.playNext();
     }
@@ -303,7 +331,7 @@ var musicServer = {
         let song = null;
         await axios({
             method: "get",
-            url: "http://music.eleuu.com/search?keywords=" + songName + " &limit=5&type=1"
+            url: "http://music.eleuu.com/search?keywords=" + songName + " &limit=10&type=1"
         }).then(function (resp) {
             // 获取歌曲列表
             let songs = resp.data.result.songs;
@@ -369,16 +397,17 @@ var musicServer = {
 
 /* 用于处理歌曲信息的方法函数 */
 const musicMethod = {
+    // 获取歌名
     getSongName: function (value) {
         let i, j, start = 0, end = 0;
         for(i = 2; i < value.length; i++){
             if(value[i] != ' ' && value[i] != '-' && value[i] != '/'){
-                start = i;
+                start = i;                
                 break;
             }
         }
         for (j = start; j < value.length; j++) {
-            if (value[j] == " " || value[j] == "-" || value[j] == "/") {
+            if (value[j] == " " || value[j] == "-" || value[j] == "/" ) {
                 end = j;
                 break;
             }
@@ -393,6 +422,7 @@ const musicMethod = {
             return null;
         }
     }, 
+    // 获取歌手
     getSongArtist: function (value) {
         let i, j, start = 0, end = 0;
         for(i = 2; i < value.length; i++){
@@ -432,6 +462,7 @@ const musicMethod = {
             }
         }
     },
+    // 设置仅可访问的对象
     getSongObject: function(value){
         let object = new Object();
         Object.defineProperties(object, {
@@ -450,10 +481,11 @@ const musicMethod = {
         })
         return object;
     },
+    // 验证点歌用户信息
     checkUser: function(uid){
         if(config.userBlackList.indexOf(uid) >= 0){
             // 用户是否被拉入黑名单
-            this.pageAlert("点歌失败，该用户已被拉入黑名单!");
+            this.pageAlert("点歌失败，你已被拉入黑名单(▼へ▼メ)!");
             return false;
         }else if(player.orderList.filter(value => value.uid == uid).length >= config.userOrder){
             // 用户点歌数是否已达上限
@@ -466,10 +498,11 @@ const musicMethod = {
         }
         return true;
     },
+    // 验证点歌歌曲信息
     checkOrder: function(order){
         if(config.songBlackList.indexOf(order.song.sid) >= 0){
             // 该歌曲是否已被加入黑名单
-            this.pageAlert("点歌失败，该歌曲已被拉入黑名单!");
+            this.pageAlert("点歌失败，该歌曲已被拉入黑名单!(▼ヘ▼#)");
             return false;
         }else if(player.orderList.some(value => value.song.sid == order.song.sid)){
             // 该歌曲是否已在点歌列表
@@ -478,15 +511,20 @@ const musicMethod = {
         }
         return true;
     },
+    // 页面提示输出
     pageAlert: function(str){
-        let tb = document.getElementsByClassName("orderTable")[0];
+        let alertBox = document.getElementsByClassName("alertBox")[0];
         let div = document.createElement('div');
         div.textContent = str;
-        div.className = "alert";
-        tb.appendChild(div);
+        div.className = "text";
+        alertBox.appendChild(div);
         setTimeout(function(){
             div.remove();
-        }, 3000)
+        }, 5000)
+    },
+    // 缩减字符串
+    reduceStr: function(str){
+        return str;
     }
 }
 

@@ -3,7 +3,8 @@ body, html{
     padding: 0;
     width: 100%;
     height: 100%;
-    background: transparent;
+    color: white;
+    background: black;
     display: flex;
     justify-content: center;
 }
@@ -14,34 +15,50 @@ body, html{
     border-radius: 13px;
     background: #e0e0e05e;
     box-shadow:  0px 0px 20px #5a5a5a;
+    table-layout:fixed;
     position: relative;
 }
 
 .orderTable thead th{
-    padding: 10px;
-}
-.orderTable tbody td{
-    height: 0px;
+    font-size: 15px;
+    text-align: center;
     padding: 10px;
 }
 
-.alert{ 
-    width: 0px;
-    color: white;
-    height: 15px;
-    position:absolute;
-    top: 200px;
-    left: 50%;
-    transform: translate(-50%, 0);
-    background: transparent;
-    padding: 7px 0px 7px 0px;
-    font-size: 17px;
-    border: 0px;
-    border-radius: 10px;
-    box-shadow:  0px 0px 10px #5a5a5a;
+.orderTable tbody td{
+    padding: 10px;
     text-align: center;
     overflow: hidden;
-    animation: show 3s forwards;
+    text-overflow:ellipsis;
+}
+
+.alertBox{ 
+    width: 300px;
+    height: 500px;
+    position: absolute;
+    top: 59px;
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.text{
+    width: 0px;
+    color: red;
+    margin: 0px 0px 7px 0px;
+    padding: 7px 0px 7px 0px;
+    font-size: 17px;
+    border-radius: 7px;
+    background: #000000c0;
+    box-shadow:  0px 0px 10px #5a5a5a;
+    text-align: center;
+    white-space:nowrap;
+    overflow: hidden;
+    z-index: 2;
+    /* text-overflow:ellipsis; */
+    animation: show 5s forwards;
 }
 
 @keyframes show {
@@ -49,7 +66,7 @@ body, html{
         width: 0px;
     }
 	50% {
-        width:100%;
+        width:98%;
     }
     100%{
         width: 0;
