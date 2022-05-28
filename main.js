@@ -108,9 +108,14 @@ function initPlayer(){
     }
     // 播放下一首方法
     player.playNext = function(){
-        // 点歌列表只有一首或者没有歌曲时，播放空闲歌单的歌曲
+        // 播放下一首时，如果点歌列表存在歌曲，则删除第一首
+        if(this.orderList.length > 0){
+            this.orderList.shift();
+            this.elem.firstElementChild.remove();
+        }
+        // 点歌列表没有歌曲，则播放空闲歌单的歌曲
         if(this.orderList.length == 0){
-            // 点歌列表无可播放的下一首歌曲，则播放空闲歌单的歌曲
+            // 点歌列表没有歌曲时，则播放空闲歌单的歌曲
             if(this.freeList.length > 0){
                 if(this.freeIndex >= this.freeList.length){
                     this.freeIndex = 0;
@@ -127,15 +132,12 @@ function initPlayer(){
     }
 
     // 添加 监听播放器播放结束事件
-    player.audio.addEventListener("ended", function(){
-        // 播放结束后删除第一首歌
-        player.orderList.shift();
-        player.elem.firstElementChild.remove();
+    player.audio.addEventListener("ended", function(){  
         // 播放下一首歌曲
         player.playNext();
     });
-    console.log("播放器已初始化!");
-    musicMethod.pageAlert("播放器已初始化!");
+    console.log("已初始化播放器!");
+    musicMethod.pageAlert("已初始化播放器!");
 }
 
 /* 加载全局配置 */
@@ -297,6 +299,10 @@ async function identifyDanmuCommand(userDanmu){
             // 4. 添加点歌信息到点歌列表
             if(musicMethod.checkOrder(order)){   
                 player.addOrder(order);
+                // 如果当前点歌列表第一首是空闲歌单，则播放下一首
+                if(player.orderList.length > 0 && player.orderList[0].uname == "空闲歌单"){
+                    player.playNext();
+                }
             }
             
             // 5. 如果当前播放没有播放歌曲，则开始播放第一首歌
@@ -307,12 +313,15 @@ async function identifyDanmuCommand(userDanmu){
             musicMethod.pageAlert("挺好听的，虽然我没找到( ･´ω`･ )");
         }
         
-    }
-    
-    // 切歌命令，触发切歌流程
-    else if (player.orderList.length > 0 && player.orderList[0].uid == userDanmu.uid && danmu == "切歌") {
-        // 播放下一首歌曲
-        player.playNext();
+    } else if (danmu == "切歌") { 
+        // 切歌命令，触发切歌流程
+        if(player.orderList[0].uid == userDanmu.uid){
+            // 播放下一首歌曲
+            player.playNext();
+        }else{
+            musicMethod.pageAlert("你不能切别人的歌哦");
+        }
+        
     }
 }
 
