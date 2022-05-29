@@ -8,7 +8,7 @@ var config = {
     maxOrder: 10,
     
     // 空闲歌单信息
-    songListId: 7422695468, 
+    songListId: 7319049505, 
     
     // 用户黑名单
     userBlackList: [352905327, 0],
@@ -68,7 +68,7 @@ window.onload = function(){
     let initSuccess = initSocket();
     
     // 4. 若初始化成功,打开websoket连接直播间
-    /* if(initSuccess){
+    /*if(initSuccess){
         openWebSocket();
     }  */
 }
@@ -152,7 +152,7 @@ async function loadGlobalConfig(){
         if(songList.length > 0){
             player.freeList = songList;
             player.playNext();
-            console.log("以获取空闲歌单列表!");
+            console.log("已获取空闲歌单列表!");
         }else{
             console.log("歌单列表获取失败!");
         }
@@ -297,29 +297,28 @@ async function identifyDanmuCommand(userDanmu){
                 song: song
             }
             // 4. 添加点歌信息到点歌列表
-            if(musicMethod.checkOrder(order)){   
+            if(await musicMethod.checkOrder(order)){   
                 player.addOrder(order);
                 // 如果当前点歌列表第一首是空闲歌单，则播放下一首
                 if(player.orderList.length > 0 && player.orderList[0].uname == "空闲歌单"){
+                    musicMethod.pageAlert("让我看看~这是哪位帅哥美女点的歌(｀・ω・´)");
                     player.playNext();
                 }
-            }
-            
+            }            
             // 5. 如果当前播放没有播放歌曲，则开始播放第一首歌
-            if(player.audio.paused){
+            if(player.audio.paused && player.orderList.length > 0){
                 player.play(player.orderList[0].song.sid);
             }
         }else{
-            musicMethod.pageAlert("挺好听的，虽然我没找到( ･´ω`･ )");
-        }
-        
+            musicMethod.pageAlert("挺好听的，虽然我没找到<(▰˘◡˘▰)>");
+        }      
     } else if (danmu == "切歌") { 
         // 切歌命令，触发切歌流程
         if(player.orderList[0].uid == userDanmu.uid){
             // 播放下一首歌曲
             player.playNext();
         }else{
-            musicMethod.pageAlert("你不能切别人的歌哦");
+            musicMethod.pageAlert("不能切别人点的歌哦(^o^)");
         }
         
     }
@@ -380,6 +379,7 @@ var musicServer = {
         @param songId 歌曲Id
     */
     getSongUrl: async function(songId){
+        let url = null;
         await axios({
             method: "get",
             url: "http://music.eleuu.com/song/url?id=" + songId
@@ -529,14 +529,18 @@ const musicMethod = {
         return true;
     },
     // 验证点歌歌曲信息
-    checkOrder: function(order){
+    checkOrder: async function(order){
         if(config.songBlackList.indexOf(order.song.sid) >= 0){
             // 该歌曲是否已被加入黑名单
             this.pageAlert("不要乱点奇怪的歌!(▼ヘ▼#)");
             return false;
         }else if(player.orderList.some(value => value.song.sid == order.song.sid)){
             // 该歌曲是否已在点歌列表
-            this.pageAlert("已经点上啦!");
+            this.pageAlert("已经点上啦!>_<!");
+            return false;
+        }else if(!await musicServer.getSongUrl(order.song.sid)){
+            // 检查是否可获取歌曲链接
+            this.pageAlert("虽然找到了,但是我放不出来>_<");
             return false;
         }
         return true;
