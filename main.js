@@ -5,13 +5,13 @@ var config = {
     userOrder: 3,
     
     // 最大点歌数限制
-    maxOrder: 10,
+    maxOrder: 15,
     
-    // 空闲歌单信息
+    // 空闲歌单信息，ACG：7422695468 纯音乐：2962948622 奇怪：7319049505
     songListId: 7319049505, 
     
     // 用户黑名单
-    userBlackList: [352905327, 0],
+    userBlackList: [0, 1],
     
     // 歌曲黑名单
     songBlackList: [],
@@ -68,9 +68,9 @@ window.onload = function(){
     let initSuccess = initSocket();
     
     // 4. 若初始化成功,打开websoket连接直播间
-    /*if(initSuccess){
+    if(initSuccess){
         openWebSocket();
-    }  */
+    } 
 }
 
 /* 初始化播放器对象 */
@@ -115,11 +115,9 @@ function initPlayer(){
         }
         // 点歌列表没有歌曲，则播放空闲歌单的歌曲
         if(this.orderList.length == 0){
-            // 点歌列表没有歌曲时，则播放空闲歌单的歌曲
+            // 点歌列表没有歌曲时，则随机播放空闲歌单的歌曲
             if(this.freeList.length > 0){
-                if(this.freeIndex >= this.freeList.length){
-                    this.freeIndex = 0;
-                }
+                this.freeIndex = parseInt(Math.random() * this.freeList.length, 10);
                 this.addOrder(this.freeList[this.freeIndex++]);
                 this.play(this.orderList[0].song.sid);
             }else{
@@ -131,11 +129,34 @@ function initPlayer(){
         }
     }
 
-    // 添加 监听播放器播放结束事件
+     // 1. 开始播放事件
+     player.audio.addEventListener("play", function () {
+        let dot = document.getElementsByClassName('dot')[0]; 
+        // 设置闪烁动画
+        if (!dot.classList.contains("dot_blink")) {
+            dot.classList.add("dot_blink");
+        }
+    });
+    // 2. 暂停播放事件
+    player.audio.addEventListener("pause", function () {
+        let dot = document.getElementsByClassName('dot')[0]; 
+        // 设置闪烁动画
+        if (!dot.classList.contains("dot_blink")) {
+            dot.classList.remove("dot_blink");
+        }
+    });
+    // 3. 播放时间更新事件
+    player.audio.addEventListener("timeupdate", function () {
+        let progress = document.getElementsByClassName('progress_bar')[0];
+        // 页面进度条实时修改
+        progress.style.width = ((player.audio.currentTime / player.audio.duration) * 280) + "px";
+    });
+    // 4. 播放器播放结束事件
     player.audio.addEventListener("ended", function(){  
         // 播放下一首歌曲
         player.playNext();
     });
+
     console.log("已初始化播放器!");
     musicMethod.pageAlert("已初始化播放器!");
 }
@@ -231,7 +252,7 @@ function openWebSocket(){
     socket.onopen = function () {
         console.log("弹幕服务器连接已打开");
         musicMethod.pageAlert("弹幕服务器连接已打开");
-        // 发送连接信息 
+        // 发送心跳包和鉴权包 
         socket.send(webSocket.authPacket);
         socket.send(webSocket.heartPacket);
 
@@ -276,21 +297,19 @@ function openWebSocket(){
 }
 
 
-
 /*  识别弹幕命令
     @param: userDanmu 包括用户id、用户名、用户弹幕
 */
 async function identifyDanmuCommand(userDanmu){
-    let danmu = userDanmu.danmu.trim().toLocaleUpperCase();
+    let danmu = userDanmu.danmu.trim();
     // 点歌命令，触发点歌流程
-    if (danmu.length >= 4 && danmu.slice(0, 2) == "点歌" && musicMethod.checkUser(userDanmu.uid)) {
-        // 1. 提取歌名、歌手
-        let songName = musicMethod.getSongName(danmu);
-        let songArtist = musicMethod.getSongArtist(danmu);
-        // 2. 通过API查询歌曲信息（歌曲id、歌名、歌手）   
-        let song = await musicServer.getSongInfo(songName, songArtist);  
+    if (danmu.slice(0, 2) == "点歌" && musicMethod.checkUser(userDanmu.uid)) {
+        // 获取点歌关键词
+        let keyword = danmu.slice(2);
+        // 根据关键词，并通过API查询歌曲信息（歌曲id、歌名、歌手）   
+        let song = await musicServer.getSongInfo(keyword);  
         if(song){
-            // 3. 封装点歌信息
+            // 封装点歌信息
             let order = {
                 uid: userDanmu.uid,
                 uname: userDanmu.uname,
@@ -301,11 +320,10 @@ async function identifyDanmuCommand(userDanmu){
                 player.addOrder(order);
                 // 如果当前点歌列表第一首是空闲歌单，则播放下一首
                 if(player.orderList.length > 0 && player.orderList[0].uname == "空闲歌单"){
-                    musicMethod.pageAlert("让我看看~这是哪位帅哥美女点的歌(｀・ω・´)");
                     player.playNext();
                 }
             }            
-            // 5. 如果当前播放没有播放歌曲，则开始播放第一首歌
+            // 如果当前播放没有播放歌曲，则开始播放第一首歌
             if(player.audio.paused && player.orderList.length > 0){
                 player.play(player.orderList[0].song.sid);
             }
@@ -315,7 +333,7 @@ async function identifyDanmuCommand(userDanmu){
     } else if (danmu == "切歌") { 
         // 切歌命令，触发切歌流程
         if(player.orderList[0].uid == userDanmu.uid){
-            // 播放下一首歌曲
+            // 如果当前播放的是该用户的歌曲，则播放下一首歌曲
             player.playNext();
         }else{
             musicMethod.pageAlert("不能切别人点的歌哦(^o^)");
@@ -332,44 +350,21 @@ var musicServer = {
         @param songName 歌名
         @param songAurhor 歌手
     */
-    getSongInfo: async function(songName, songArtist){
+    getSongInfo: async function(keyword){
         let song = null;
         await axios({
             method: "get",
-            url: "http://music.eleuu.com/search?keywords=" + songName + " &limit=10&type=1"
+            url: "http://music.eleuu.com/search?keywords=" + keyword + " &limit=10&type=1"
         }).then(function (resp) {
             // 获取歌曲列表
             let songs = resp.data.result.songs;
-            let nameIndex = -1, artistIndex = -1;
-            // 查询歌名匹配的歌曲下标
-            for(let i = 0; i < songs.length; i++){
-                if(musicMethod.formatSongName(songs[i].name) == songName){
-                    nameIndex = i;
-                    if(songArtist){
-                        // 若存在歌手要求、则查询歌手匹配的歌曲下标
-                        for(let j = 0; j < songs[i].artists.length; j++){
-                            if(musicMethod.formatSongName(songs[i].artists[j].name) == songArtist){
-                                artistIndex = j;
-                                break;
-                            }
-                        }
-                    }else{
-                        // 若无歌手要求，则默认匹配歌名的歌曲第一个歌手
-                        artistIndex = 0;
-                        break;
-                    }
-                    if(artistIndex >= 0){
-                        break;
-                    }
-                }
-            }
-            // 如果歌名和歌手索引均存在，则证明查询成功
-            if(nameIndex >= 0 && artistIndex >= 0){
+            if(songs.length > 0){
+                // 封装歌曲信息
                 song = musicMethod.getSongObject({
-                    sid: songs[nameIndex].id,
-                    sname: songs[nameIndex].name,
-                    sartist: songs[nameIndex].artists[artistIndex].name
-                })
+                    sid: songs[0].id,
+                    sname: songs[0].name,
+                    sartist:songs[0].artists[0].name
+                });
             }
         })
         return song;
@@ -398,7 +393,7 @@ var musicServer = {
         let songList = new Array();
         await axios({
             method: "get",
-            url: "http://plugin.changsheng.space:3000/playlist/track/all?id=" + listId
+            url: "http://plugin.changsheng.space:3000/playlist/track/all?id=" + listId + "&limit=30&offset=1"
         }).then(function (resp) {
             let songs = resp.data.songs;
             // 获取歌单的所有歌曲
@@ -415,83 +410,12 @@ var musicServer = {
                 songList.push(song);
             }
         })
-        return songList
+        return songList;
     }
 }
 
 /* 用于处理歌曲信息的方法函数 */
 const musicMethod = {
-    // 获取歌名
-    getSongName: function (value) {
-        let i, j, start = 0, end = 0;
-        for(i = 2; i < value.length; i++){
-            if(value[i] != ' ' && value[i] != '-' && value[i] != '/'){
-                start = i;                
-                break;
-            }
-        }
-        for (j = start; j < value.length; j++) {
-            if (value[j] == " " || value[j] == "-" || value[j] == "/" ) {
-                end = j;
-                break;
-            }
-        }
-        if(j == value.length){
-            end = j;
-        }
-
-        if (start > 2 && end > start) {
-            return value.slice(start, end);
-        } else {
-            return null;
-        }
-    }, 
-    // 获取歌手
-    getSongArtist: function (value) {
-        let i, j, start = 0, end = 0;
-        for(i = 2; i < value.length; i++){
-            if(value[i] != " " && value[i] != "-" && value[i] != "/"){
-                start = i;
-                break;
-            }
-        }
-        for (j = start; j < value.length; j++) {
-            if (value[j] == " " || value[j] == "-" || value[j] == "/") {
-                end = j;
-                break;
-            }
-        }
-        if(j == value.length){
-            return null;
-        }else{
-            for(i = end; i < value.length; i++){
-                if(value[i] != " " && value[i] != "-" && value[i] != "/"){
-                    start = i;
-                    break;
-                }
-            }
-            for (j = start; j < value.length; j++) {
-                if (value[j] == " " || value[j] == "-" || value[j] == "/") {
-                    end = j;
-                    break;
-                }
-            }
-            if(j == value.length){
-                end = j;
-            }
-            if (start > 4 && end > start) {
-                return value.slice(start, end);
-            } else {
-                return null;
-            }
-        }
-    },
-    // 格式化歌名，转大写+去空格
-    formatSongName : function(songName){
-        let pos = songName.indexOf('(');
-        songName = songName.toLocaleUpperCase().replace(/\s+/g, "");;
-        return pos >= 0 ? songName.slice(0, pos) : songName;
-    },
     // 设置仅可访问的歌曲对象
     getSongObject: function(value){
         let object = new Object();
@@ -554,7 +478,7 @@ const musicMethod = {
         alertBox.appendChild(div);
         setTimeout(function(){
             div.remove();
-        }, 5000)
+        }, 7000)
     },
 }
 
@@ -603,6 +527,7 @@ const packetMethod = {
 
                 // 消息体body格式转换  (bit->Byte->string->json)
                 const jsonDanmu = JSON.parse(packetMethod.uintArrayToString(new Uint8Array(body)));
+                // console.log(jsonDanmu);
                 // 提取弹幕消息
                 if(jsonDanmu.cmd == "DANMU_MSG"){
                     identifyDanmuCommand({
