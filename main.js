@@ -1,11 +1,16 @@
 /* 默认全局配置信息 */
 var config = {
-    
+    // 管理员id (即主播自己)
+    adminId: 352905327,
+
     // 用户点歌数量限制
     userOrder: 3,
     
     // 最大点歌数限制
     maxOrder: 15,
+
+    // 最大歌曲时长限制(单位秒)
+    maxDuration: 300,
     
     // 空闲歌单信息，ACG：7422695468 纯音乐：2962948622 奇怪：7319049505
     songListId: 7319049505, 
@@ -84,7 +89,6 @@ function initPlayer(){
     // 初始化空闲歌单列表
     player.freeList = new Array(); 
 
-
     // 添加点歌方法
     player.addOrder = function(order){
         // 添加点歌信息到点歌列表中
@@ -151,12 +155,16 @@ function initPlayer(){
         // 页面进度条实时修改
         progress.style.width = ((player.audio.currentTime / player.audio.duration) * 280) + "px";
     });
-    // 4. 播放器播放结束事件
+    // 4. 播放结束事件
     player.audio.addEventListener("ended", function(){  
         // 播放下一首歌曲
         player.playNext();
     });
-
+    // 5. 播放失败事件
+    player.audio.addEventListener("error", function(){  
+        // 播放下一首歌曲
+        player.playNext();
+    });
     console.log("已初始化播放器!");
     musicMethod.pageAlert("已初始化播放器!");
 }
@@ -332,8 +340,8 @@ async function identifyDanmuCommand(userDanmu){
         }      
     } else if (danmu == "切歌") { 
         // 切歌命令，触发切歌流程
-        if(player.orderList[0].uid == userDanmu.uid){
-            // 如果当前播放的是该用户的歌曲，则播放下一首歌曲
+        if(player.orderList[0].uid == userDanmu.uid || player.orderList[0].uid == config.adminId){
+            // 如果当前播放的是该用户的歌曲，或者发送命令的是主播，则播放下一首歌曲
             player.playNext();
         }else{
             musicMethod.pageAlert("不能切别人点的歌哦(^o^)");
@@ -363,7 +371,8 @@ var musicServer = {
                 song = musicMethod.getSongObject({
                     sid: songs[0].id,
                     sname: songs[0].name,
-                    sartist:songs[0].artists[0].name
+                    sartist:songs[0].artists[0].name,
+                    duration: songs[0].duration
                 });
             }
         })
@@ -462,6 +471,9 @@ const musicMethod = {
             // 该歌曲是否已在点歌列表
             this.pageAlert("已经点上啦!>_<!");
             return false;
+        } else if(order.song.duration > config.maxDuration * 1000){
+            this.pageAlert("你点的歌时太长啦!>_<");
+            return false
         }else if(!await musicServer.getSongUrl(order.song.sid)){
             // 检查是否可获取歌曲链接
             this.pageAlert("虽然找到了,但是我放不出来>_<");
