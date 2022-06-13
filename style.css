@@ -111,7 +111,7 @@ body, html{
     text-align: center;
     white-space:nowrap;
     overflow: hidden;
-    z-index: 2;
+    z-index: 3;
     text-overflow:ellipsis;
     animation: show 7s forwards ease-in-out;
 }
@@ -126,4 +126,67 @@ body, html{
     100%{
         width: 0;
     }
+}
+
+/* 配置按钮样式 */
+#setting{
+    width: 0px;
+    border: 0;
+    padding: 0px;
+    font-weight: bolder;
+    border-radius: 5px;
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, 0);
+    white-space: nowrap;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: .5s;
+}
+.main:hover #setting{
+    width: 100px;
+}
+#setting:hover{
+    background: rgb(235, 152, 152);
+}
+
+/* 配置页面样式 */
+.config{
+    width: 500px;
+    height: 0px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: rgb(114, 114, 114);
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translate(-50%, 0);
+    display: flex;
+    justify-content: center;
+    z-index: 2;
+    transition: .5s;
+}
+.config tr td{
+    width: 100px;
+    padding: 5px 0px;
+}
+.config tr td:nth-child(1){
+    text-align: right;
+}
+.config tr td:nth-child(2){
+    text-align: center;
+}
+.config tr td:nth-child(3){
+    text-align: left;
+}
+
+.config tr td input{
+    /* outline: none; */
+    width: 100px;
+}
+.config tr td select{
+    /* outline: none; */
+    width: 100%;
 }

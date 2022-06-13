@@ -1,26 +1,20 @@
-/* 默认全局配置信息 */
-var config = {
-    // 管理员id (即主播自己)
-    adminId: 352905327,
-
-    // 用户点歌数量限制
-    userOrder: 3,
+window.onload = function(){
+    // 1. 初始化播放器
+    initPlayer();
     
-    // 最大点歌数限制
-    maxOrder: 15,
-
-    // 最大歌曲时长限制(单位秒)
-    maxDuration: 300,
     
-    // 空闲歌单信息，ACG：7422695468 纯音乐：2962948622 奇怪：7319049505
-    songListId: 7319049505, 
+    // 2. 初始化配置项
+    initConfig();
     
-    // 用户黑名单
-    userBlackList: [0, 1],
+    // 3. 初始化webSocket对象
+    let initSuccess = initSocket();
     
-    // 歌曲黑名单
-    songBlackList: [],
+    // 4. 若初始化成功,打开websoket连接直播间
+    if(initSuccess){
+        openWebSocket();
+    } 
 }
+
 
 /* 播放器对象 */
 const player = {
@@ -32,62 +26,25 @@ const player = {
     elem: null,
 
     // 用户点歌列表
-    orderList: null,
+    orderList: [],
 
     // 空闲歌单列表 
-    freeList: null,
+    freeList: [],
 
     // 空闲歌单列表的播放索引
     freeIndex: 0, 
+
+    // 点歌历史用户
+    userHistory: [],
+
+    // 点歌历史歌曲
+    songHistory: [],
 }
-
-// webSocket对象
-const webSocket = {
-    // socket连接地址
-    url: "",
-
-    // webSoket对象
-    socket: null,
-    
-    // 直播间ID
-    roomId: 0,
-
-    // 发送心跳包的定时器
-    timer: null,
-
-    // 鉴权包
-    authPacket: null,
-
-    // 心跳包
-    heartPacket: null,
-}
-
-window.onload = function(){
-    // 1. 初始化播放器
-    initPlayer();
-    
-    // 2. 加载全局配置
-    loadGlobalConfig();
-    
-    // 3. 初始化webSocket对象
-    let initSuccess = initSocket();
-    
-    // 4. 若初始化成功,打开websoket连接直播间
-    if(initSuccess){
-        openWebSocket();
-    } 
-}
-
-/* 初始化播放器对象 */
 function initPlayer(){
     // 创建音频对象
     player.audio = new Audio();  
     // 绑定页面元素
     player.elem = document.getElementById('songList');
-    // 初始化点歌列表
-    player.orderList = new Array();
-    // 初始化空闲歌单列表
-    player.freeList = new Array(); 
 
     // 添加点歌方法
     player.addOrder = function(order){
@@ -100,6 +57,17 @@ function initPlayer(){
             <td>${order.uname}</td></td>`
         this.elem.appendChild(tr);
         
+        // 添加到用户历史记录和歌曲历史记录中
+        configMethod.addUserHistory({
+            uid: order.uid,
+            uname: order.uname 
+        })
+        
+        configMethod.addSongHistory({
+            sid: order.song.sid,
+            sname: order.song.sname
+        })
+       
     }
     // 播放歌曲方法
     player.play = async function(songId){
@@ -169,28 +137,271 @@ function initPlayer(){
     musicMethod.pageAlert("已初始化播放器!");
 }
 
-/* 加载全局配置 */
-async function loadGlobalConfig(){
-    // 在本地存储中获取配置项
-    if(localStorage.getItem("config")){
-        config = extendCopy(JSON.parse(localStorage.getItem("config")));
-    }
-    // 根据配置中的歌单号，获取空闲歌单列表
-    if(config.songListId){
-        let songList = await musicServer.getSongList(config.songListId);
-        if(songList.length > 0){
-            player.freeList = songList;
-            player.playNext();
-            console.log("已获取空闲歌单列表!");
-        }else{
-            console.log("歌单列表获取失败!");
+
+/* 配置对象 */
+var config = {
+    // 管理员id (即主播自己)
+    adminId: 352905327,
+
+    // 用户点歌数量限制
+    userOrder: 3,
+    
+    // 最大点歌数限制
+    maxOrder: 15,
+
+    // 最大歌曲时长限制(单位秒)
+    maxDuration: 300,
+    
+    // 空闲歌单信息，ACG：7422695468 纯音乐：2962948622 奇怪：7319049505
+    songListId: 7319049505, 
+    
+    // 用户黑名单
+    userBlackList: [],
+    
+    // 歌曲黑名单
+    songBlackList: [],
+
+    // 登录手机号
+    phone: null,
+
+    // 用户登录的cookie
+    cookie: null,
+}
+function initConfig(){
+    // 1. 在本地存储中获取配置项
+    for(let key in config){
+        if(localStorage.getItem(key)){
+            switch(key){
+                case 'phone':
+                    config[key] = localStorage.getItem(key);
+                    break;
+                case 'cookie':
+                    config[key] = localStorage.getItem(key);
+                    break;
+                case 'userBlackList':
+                    config[key] = JSON.parse(localStorage.getItem(key));
+                    break;
+                case 'songBlackList': 
+                    config[key] = JSON.parse(localStorage.getItem(key));
+                    break;
+                default: 
+                    config[key] = parseInt(localStorage.getItem(key));
+                    break;
+            }           
         }
     }
-    console.log("已加载全局配置!");
-    musicMethod.pageAlert("已加载全局配置!");
+
+    // 2. 加载空闲歌单
+    configMethod.loadSongList(config.songListId);
+
+    // 3. 读取黑名单
+    let userHistory = document.getElementById('userHistory');
+    let songHistory = document.getElementById('songHistory');
+    let userBlackList = document.getElementById('userBlackList');
+    let songBlackList = document.getElementById('songBlackList');
+    for(let i = 0; i < config.userBlackList.length; i++){
+        let op = document.createElement('option');
+        op.value = config.userBlackList[i].uid;
+        op.textContent = config.userBlackList[i].uname;
+        userBlackList.appendChild(op);
+    }
+
+    for(let i = 0; i < config.songBlackList.length; i++){
+        let op = document.createElement('option');
+        op.value = config.songBlackList[i].sid;
+        op.textContent = config.songBlackList[i].sname;
+        songBlackList.appendChild(op);
+    }
+
+    // 4. 设置实时修改配置项方法
+    let keys = ["adminId", "userOrder", "maxOrder", "maxDuration"];
+    for(let i = 0; i < keys.length; i++){
+        let elem = document.getElementById(keys[i]);
+        elem.value = config[keys[i]];
+        elem.addEventListener('keyup', function(){
+            // 保存配置
+            config[keys[i]] = parseInt(elem.value);
+            localStorage.setItem(keys[i], elem.value);
+        })
+    }
+
+    // 5. 绑定所有配置项按钮事件
+    let sendTimer;
+    let phone = document.getElementById('phone');      
+    let captcha = document.getElementById('captcha');
+    // --获取验证码
+    document.getElementById('getCaptcha').onclick = async function(e){
+        var regExp = new RegExp("^1[3578]\\d{9}$");
+        if(phone.value != "" && regExp.test(phone.value)){       
+            let second = 30;
+            config.phone = phone.value;
+            let resp = await musicServer.sendCaptcha(config.phone);
+            if(resp.code == 200){
+                localStorage.setItem("phone", config.phone);
+                musicMethod.pageAlert("发送成功!");
+            }else{
+                config.phone = null;
+                musicMethod.pageAlert(message);
+            }
+            // 发送成功后60s后才可再次发送申请
+            e.target.setAttribute("disabled", true);
+            e.target.textContent = second;
+            sendTimer = setInterval(function(){
+                if(second > 0){
+                    second--;
+                    e.target.textContent = second;
+                }else{
+                    e.target.removeAttribute("disabled");
+                    e.target.textContent = "获取验证码";
+                    clearInterval(sendTimer);
+                }
+            }, 1000)
+        }else{
+            musicMethod.pageAlert("手机号不正确!");
+        }
+    }
+    // --登录
+    document.getElementById('login').onclick = async function(e){
+        if(config.cookie == null){
+            if(config.phone != null && captcha.value != ""){
+                 // 先校验验证码是否正确
+                let verify = await musicServer.verifyCaptcha(config.phone, captcha.value);
+                // 请求登录
+                if(verify.code == 200){
+                    let loginData = await musicServer.login(config.phone, captcha.value);
+                    config.cookie = loginData.cookie;
+                    localStorage.setItem("cookie", config.cookie);
+                    e.target.textContent = "已登录";
+                }else{
+                    musicMethod.pageAlert(verify.message);
+                }
+            }else{
+                musicMethod.pageAlert("未输入手机号或者验证码！");
+            }
+        }else{
+            let loginStatus = await musicServer.loginStatus();
+            if(loginStatus.code == 200){
+                if(loginStatus.account.status == 1){
+                    musicServer.logout();
+                    config.cookie = null;
+                    e.target.textContent = "登录";
+                    musicMethod.pageAlert("已退出登录!");
+                }else{
+                    musicMethod.pageAlert("用户未登录");
+                }
+            }else{
+                musicMethod.pageAlert("获取登录状态失败!用户已登录");
+            }  
+        }  
+    }
+    // --加载歌单
+    document.getElementById('loadSongList').onclick = async function(e){
+        let listId = parseInt(songListId.value);
+        if(listId && config.listId != listId){
+            configMethod.loadSongList(listId);
+            // 设置防抖功能, 使按钮失效两秒
+            e.target.setAttribute("disabled", true);
+            setTimeout(function(){
+                console.log(e.target);
+                e.target.removeAttribute("disabled");
+            }, 3000);
+        }else{
+            musicMethod.pageAlert("未修改歌单Id");
+        }
+    };
+    // --添加用户到黑名单
+    document.getElementById('addUserBlack').onclick = function(){
+        if(userHistory.children.length > 0){
+            configMethod.addUserBlackList({
+                uid: parseInt(userHistory[userHistory.selectedIndex].value),
+                uname: userHistory[userHistory.selectedIndex].textContent
+            });
+            localStorage.setItem("userBlackList", JSON.stringify(config.userBlackList));
+        }else{
+            musicMethod.pageAlert("历史用户为空!");
+        }
+    };
+    // --添加歌曲到黑名单
+    document.getElementById('addSongBlack').onclick = function(){
+        if(songHistory.children.length > 0){
+            configMethod.addSongBlackList({
+                sid: parseInt(songHistory[songHistory.selectedIndex].value),
+                sname: songHistory[songHistory.selectedIndex].textContent
+            });
+            localStorage.setItem("songBlackList", JSON.stringify(config.songBlackList));
+        }else{
+            musicMethod.pageAlert("历史歌曲为空");
+        }
+    };
+    // --移除黑名单的用户
+    document.getElementById('delUserBlack').onclick = function(){
+        if(userBlackList.selectedIndex > -1){
+            let uid = userBlackList.options[userBlackList.selectedIndex].value;
+            // 移除页面中用户黑名单的选中用户
+            userBlackList.options[userBlackList.selectedIndex].remove();
+            // 移除配置项中用户黑名单的对应用户
+            for(let i = 0; i < config.userBlackList.length; i++){
+                if(config.userBlackList[i].uid == parseInt(uid)){
+                    config.userBlackList.splice(i, 1);
+                    localStorage.setItem("userBlackList", JSON.stringify(config.userBlackList));
+                    break;
+                }
+            }
+        }else{
+            musicMethod.pageAlert("移除失败，未选择移除用户");
+        }
+        
+    };
+    // --移除黑名单的歌曲
+    document.getElementById('delSongBlack').onclick = function(){
+        if(songBlackList.selectedIndex > -1){
+            let sid = songBlackList.options[songBlackList.selectedIndex].value;
+            // 移除页面中歌曲黑名单的选中歌曲
+            songBlackList.options[songBlackList.selectedIndex].remove();
+            // 移除配置项中歌曲黑名单对应的歌曲
+            for(let i = 0; i < config.songBlackList.length; i++){
+                if(config.songBlackList[i].sid == parseInt(sid)){
+                    config.songBlackList.splice(i, 1);
+                    localStorage.setItem("songBlackList", JSON.stringify(config.songBlackList));
+                    break;
+                }
+            }
+        }else{
+            musicMethod.pageAlert("移除失败，未选择移除歌曲");
+        }
+    };
+    // --设置界面的显示与隐藏
+    document.getElementById('setting').onclick = function(){
+        let configPanel = document.getElementsByClassName('config')[0];
+        if(configPanel.clientHeight < 500){
+            configPanel.style.height = "600px";
+        }else{
+            configPanel.style.height = "0px";
+        }
+    } 
+    musicMethod.pageAlert("已初始化配置项");
 }
 
-/* 初始化socket对象 */
+/* webSocket对象 */
+const webSocket = {
+    // socket连接地址
+    url: "",
+
+    // webSoket对象
+    socket: null,
+    
+    // 直播间ID
+    roomId: 0,
+
+    // 发送心跳包的定时器
+    timer: null,
+
+    // 鉴权包
+    authPacket: null,
+
+    // 心跳包
+    heartPacket: null,
+}
 function initSocket(){
     // 检查浏览器是否支持webSocket 
     if (typeof (WebSocket) == "undefined") {
@@ -236,6 +447,7 @@ function initSocket(){
     musicMethod.pageAlert("已初始化webSocket连接!");
     return true;
 }
+
 
 /* 打开websocket连接 */ 
 function openWebSocket(){
@@ -323,9 +535,10 @@ async function identifyDanmuCommand(userDanmu){
                 uname: userDanmu.uname,
                 song: song
             }
-            // 4. 添加点歌信息到点歌列表
-            if(await musicMethod.checkOrder(order)){   
+            if(await musicMethod.checkOrder(order)){ 
+                // 添加点歌信息到点歌列表  
                 player.addOrder(order);
+
                 // 如果当前点歌列表第一首是空闲歌单，则播放下一首
                 if(player.orderList.length > 0 && player.orderList[0].uname == "空闲歌单"){
                     player.playNext();
@@ -340,7 +553,7 @@ async function identifyDanmuCommand(userDanmu){
         }      
     } else if (danmu == "切歌") { 
         // 切歌命令，触发切歌流程
-        if(player.orderList[0].uid == userDanmu.uid || player.orderList[0].uid == config.adminId){
+        if(player.orderList[0].uid == userDanmu.uid || userDanmu.uid == config.adminId){
             // 如果当前播放的是该用户的歌曲，或者发送命令的是主播，则播放下一首歌曲
             player.playNext();
         }else{
@@ -354,6 +567,107 @@ async function identifyDanmuCommand(userDanmu){
 
 /* 歌曲API服务 */
 var musicServer = {
+    
+    // 服务器地址
+    baseUrl: "http://plugin.changsheng.space:3000",
+    
+    /* 发送验证码 
+        @param phone 手机号
+    */
+    sendCaptcha: async function(phone){
+        let data;
+        await axios({
+            method: "get",
+            url: this.baseUrl + "/captcha/sent",
+            params:{
+                phone: phone
+            }
+        }).then(function (resp) {
+            data = resp.data;
+        });
+        return data;
+    },
+    /* 校验验证码 
+        @param phone 手机号
+       @param captcha 验证码
+    */
+    verifyCaptcha: async function(phone, captcha){
+        let data;
+        await axios({
+            method: "get",
+            url: this.baseUrl + "/captcha/verify",
+            params: {
+                phone: phone,
+                captcha: captcha,
+            }
+        }).then(function (resp) {
+            data = resp.data;
+        });
+        return data;
+    },
+    /* 登录
+       @param phone 手机号
+       @param captcha 验证码
+     */
+    login: async function(phone, captcha){
+        let data;
+        await axios({
+            method: "get",
+            url: this.baseUrl + "/login/cellphone",
+            params: {
+                phone: phone,
+                captcha: captcha,
+            }
+        }).then(function (resp) {
+            data = resp.data;
+        });
+        return data;
+    },
+
+    /* 退出登录 */
+    logout: async function(){
+        let data;
+        await axios({
+            method: "get",
+            url: this.baseUrl + "/logout",
+            params: {
+                cookie: config.cookie
+            }
+        }).then(function (resp) {
+            data = resp.data;
+        });
+        return data;
+    },
+    /* 获取用户详情 */
+    getUserDetail: async function(){
+        let data;
+        await axios({
+            method: "get",
+            url: this.baseUrl + "/user/account",
+            params: {
+                cookie: config.cookie
+            }
+        }).then(function (resp) {
+            data = resp.data;
+            console.log(resp.data);
+        });
+        return data;
+    },
+    /* 登录状态 */
+    loginStatus: async function(){
+        let data;
+        await axios({
+            method: "get",
+            url: this.baseUrl + "/login/status",
+            params: {
+                cookie: config.cookie
+            }
+        }).then(function (resp) {
+            data = resp.data;
+        });
+        return data;
+    },
+
     /* 搜索歌曲信息 
         @param songName 歌名
         @param songAurhor 歌手
@@ -362,7 +676,13 @@ var musicServer = {
         let song = null;
         await axios({
             method: "get",
-            url: "http://music.eleuu.com/search?keywords=" + keyword + " &limit=10&type=1"
+            url: this.baseUrl +"/search",
+            params: {
+                cookie: config.cookie,
+                keywords: keyword,
+                limit: 10,
+                type: 1,
+            }
         }).then(function (resp) {
             // 获取歌曲列表
             let songs = resp.data.result.songs;
@@ -386,7 +706,11 @@ var musicServer = {
         let url = null;
         await axios({
             method: "get",
-            url: "http://music.eleuu.com/song/url?id=" + songId
+            url: this.baseUrl + "/song/url",
+            params: {
+                cookie: config.cookie,
+                id: songId
+            }
         }).then(function (resp) {
             if(resp.data.data[0].url){
                 url = resp.data.data[0].url;
@@ -402,7 +726,11 @@ var musicServer = {
         let songList = new Array();
         await axios({
             method: "get",
-            url: "http://plugin.changsheng.space:3000/playlist/track/all?id=" + listId + "&limit=30&offset=1"
+            url: this.baseUrl + "/playlist/track/all",
+            params: {
+                cookie: config.cookie,
+                id: listId
+            }
         }).then(function (resp) {
             let songs = resp.data.songs;
             // 获取歌单的所有歌曲
@@ -420,7 +748,8 @@ var musicServer = {
             }
         })
         return songList;
-    }
+    },
+    
 }
 
 /* 用于处理歌曲信息的方法函数 */
@@ -440,17 +769,24 @@ const musicMethod = {
             'sartist':{
                 value: value.sartist,
                 enumerable: true
+            },
+            'duration':{
+                value: value.duration,
+                enumerable: true
             }
         })
         return object;
     },
     // 验证点歌用户信息
     checkUser: function(uid){
-        if(config.userBlackList.indexOf(uid) >= 0){
-            // 用户是否被拉入黑名单
-            this.pageAlert("你已被加入暗杀名单!(▼へ▼メ)!");
-            return false;
-        }else if(player.orderList.filter(value => value.uid == uid).length >= config.userOrder){
+        for (let i = 0; i < config.userBlackList.length; i++) {
+            if(config.userBlackList[i].uid = uid){
+                // 用户是否被拉入黑名单
+                this.pageAlert("你已被加入暗杀名单!(▼へ▼メ)!");
+                return false;
+            }
+        }
+        if(player.orderList.filter(value => value.uid == uid).length >= config.userOrder){
             // 用户点歌数是否已达上限
             this.pageAlert("你点太多啦，歇歇吧>_<!");
             return false;
@@ -463,11 +799,14 @@ const musicMethod = {
     },
     // 验证点歌歌曲信息
     checkOrder: async function(order){
-        if(config.songBlackList.indexOf(order.song.sid) >= 0){
-            // 该歌曲是否已被加入黑名单
-            this.pageAlert("不要乱点奇怪的歌!(▼ヘ▼#)");
-            return false;
-        }else if(player.orderList.some(value => value.song.sid == order.song.sid)){
+        for (let i = 0; i < config.songBlackList.length; i++) {
+            if(config.songBlackList[i].sid = order.song.sid){
+                // 用户是否被拉入黑名单
+                this.pageAlert("不要乱点奇怪的歌!(▼ヘ▼#)");
+                return false;
+            }
+        }
+        if(player.orderList.some(value => value.song.sid == order.song.sid)){
             // 该歌曲是否已在点歌列表
             this.pageAlert("已经点上啦!>_<!");
             return false;
@@ -475,8 +814,7 @@ const musicMethod = {
             this.pageAlert("你点的歌时太长啦!>_<");
             return false
         }else if(!await musicServer.getSongUrl(order.song.sid)){
-            // 检查是否可获取歌曲链接
-            this.pageAlert("虽然找到了,但是我放不出来>_<");
+            this.pageAlert("虽然找到了,但是放不出来>_<");
             return false;
         }
         return true;
@@ -620,5 +958,109 @@ const packetMethod = {
     },
 };
 
+/* 用于处理设置方法 */
+const configMethod = {
+    // 添加用户历史记录
+    addUserHistory: function(user){
+        let existUser = false;
+        for (let i = 0; i < player.userHistory.length; i++) {
+            if(player.userHistory[i].uid == user.uid){
+                existUser = true;
+            }
+        }
+        if(!existUser){
+            // 添加到播放器的用户历史记录中
+            player.userHistory.push(user);
+            // 同步页面的历史用户下拉框
+            let userHistory = document.getElementById('userHistory');
+            let op = document.createElement('option');
+            op.value = user.uid;
+            op.textContent = user.uname;
+            userHistory.appendChild(op);
+        }else{
+            console.log("用户已存在历史用户记录中");
+        }
+        
+    },
+    // 添加歌曲历史记录
+    addSongHistory: function(song){
+        let existSong = false;
+        for (let i = 0; i < player.songHistory.length; i++) {
+            if(player.songHistory[i].sid == song.sid){
+                existSong = true;
+            }
+        }
+        if(!existSong){
+            // 添加到播放器的歌曲历史记录中
+            player.songHistory.push(song);
+            // 同步页面的历史歌曲下拉框
+            let songHistory = document.getElementById('songHistory');
+            let op = document.createElement('option');
+            op.value = song.sid;
+            op.textContent = song.sname;
+            songHistory.appendChild(op);
+        }else{
+            console.log("歌曲已存在歌曲历史记录中");
+        }
+    },
+    // 添加用户黑名单
+    addUserBlackList: function(user){
+        let existUser = false;
+        for (let i = 0; i < config.userBlackList.length; i++) {
+            if(config.userBlackList[i].uid == user.uid){
+                existUser =  true;
+            }
+        }
+        if(!existUser){
+            // 用户黑名单添加用户
+            config.userBlackList.push(user);
+            // 页面用户黑名单列表添加用户
+            let userBlackList = document.getElementById('userBlackList');
+            let op = document.createElement('option');
+            op.value = user.uid;
+            op.textContent = user.uname;
+            userBlackList.appendChild(op);
+        }else{
+            console.log("用户已加入黑名单, 请勿重复添加!");
+        }
+    },
+    // 添加歌曲黑名单 
+    addSongBlackList: function(song){
+        let existSong = false;
+        for (let i = 0; i < config.songBlackList.length; i++) {
+            if(config.songBlackList[i].sid == song.sid){
+                existSong =  true;
+            }
+        }
+        if(!existSong){
+            // 歌曲黑名单添加歌曲
+            config.songBlackList.push(song);
+            // 页面歌曲黑名单列表添加歌曲
+            let songBlackList = document.getElementById('songBlackList');
+            let op = document.createElement('option');
+            op.value = song.sid;
+            op.textContent = song.sname;
+            songBlackList.appendChild(op);
+        }else{
+            console.log("歌曲已加入黑名单, 请勿重复添加!");
+        }
+    },
+    // 加载空闲歌单
+    loadSongList: async function(listId){
+        // 获取新的歌单
+        let songList = await musicServer.getSongList(listId);
+        if(songList.length > 0){
+            player.freeList = songList;
+            // 获取歌单成功后保存配置项
+            config.listId = listId;
+            localStorage.setItem("listId", config.listId);
+            // 播放下一首
+            player.playNext();
+            musicMethod.pageAlert("已获取空闲歌单列表!");
+        }else{
+            musicMethod.pageAlert("歌单列表获取失败!");
+        }
+    }
+}
 
 
