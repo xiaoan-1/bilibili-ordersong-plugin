@@ -10,15 +10,15 @@ b站直播姬点歌H5插件
     - 管理员可以切换任何人的歌曲
 
 ## 点歌面板
-![点歌界面](https://github.com/xiaoan-1/bilibili-ordersong-plugin/tree/main/img/点歌界面.png)
+![点歌界面](http://plugin.changsheng.space/images/%E7%82%B9%E6%AD%8C%E7%95%8C%E9%9D%A2.png)
 
 ## 设置面板
-![设置面板](https://github.com/xiaoan-1/bilibili-ordersong-plugin/tree/main/img/设置面板.png)
+![设置面板](http://plugin.changsheng.space/images/%E8%AE%BE%E7%BD%AE%E7%95%8C%E9%9D%A2.png)
 
 
 ## 提示信息
-![提示1](https://github.com/xiaoan-1/bilibili-ordersong-plugin/tree/main/img/提示1.png)
-![提示2](https://github.com/xiaoan-1/bilibili-ordersong-plugin/tree/main/img/提示2.png)
+![提示1](http://plugin.changsheng.space/images/%E6%8F%90%E7%A4%BA1.png)
+![提示2](http://plugin.changsheng.space/images/%E6%8F%90%E7%A4%BA2.png)
 
 
 
