@@ -1,4 +1,5 @@
 b站直播姬点歌H5插件
+
 本插件用于bilibili直播姬提供给观众点歌的功能，音源来自网易
 
 ## 观众指令
@@ -9,15 +10,15 @@ b站直播姬点歌H5插件
     - 管理员可以切换任何人的歌曲
 
 ## 点歌面板
-![点歌界面](./img/%E7%82%B9%E6%AD%8C%E7%95%8C%E9%9D%A2.png)
+![点歌界面](https://github.com/xiaoan-1/bilibili-ordersong-plugin/tree/main/img/点歌界面.png)
 
 ## 设置面板
-![alt 属性文本](./img/%E8%AE%BE%E7%BD%AE%E7%95%8C%E9%9D%A2.png)
+![设置面板](https://github.com/xiaoan-1/bilibili-ordersong-plugin/tree/main/img/设置面板.png)
 
 
 ## 提示信息
-![alt 属性文本](./img/%E6%8F%90%E7%A4%BA1.png)
-![alt 属性文本](./img/%E6%8F%90%E7%A4%BA2.png)
+![提示1](https://github.com/xiaoan-1/bilibili-ordersong-plugin/tree/main/img/提示1.png)
+![提示2](https://github.com/xiaoan-1/bilibili-ordersong-plugin/tree/main/img/提示2.png)
 
 
 
