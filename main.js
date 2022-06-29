@@ -1,8 +1,7 @@
 window.onload = function(){
     // 1. 初始化播放器
     initPlayer();
-    
-    
+      
     // 2. 初始化配置项
     initConfig();
     
@@ -413,18 +412,19 @@ function initSocket(){
     webSocket.url = "wss://broadcastlv.chat.bilibili.com:2245/sub";
 
     // 设置房间id
-    webSocket.roomId = 22811879;
-    /* let URLParam = window.location.search.substring(1).split('&');
+    let URLParam = window.location.search.substring(1).split('&');
     URLParam.forEach(str => {
         let param = str.split('=');
         if(param.length == 2 && param[0].toLocaleUpperCase() == "ROOMID"){
             webSocket.roomId = parseInt(param[1]);
-            musicMethod.pageAlert("直播间ID =" + webSocket.roomId);
+            musicMethod.pageAlert("已获取直播间ID:" + webSocket.roomId);
         }
-    }); */
+    });
 
     if(!webSocket.roomId){
-        musicMethod.pageAlert("未获取到直播间ID");
+        setInterval(function(){
+            musicMethod.pageAlert("未获取到直播间ID,请检查URL");
+        },7000);
         return false;
     }
 
