@@ -169,7 +169,7 @@ body, html{
     transition: .5s;
 }
 .config tr td{
-    width: 100px;
+    width: 200px;
     padding: 5px 0px;
 }
 .config tr td:nth-child(1){
@@ -184,9 +184,15 @@ body, html{
 
 .config tr td input{
     /* outline: none; */
-    width: 100px;
+    width: 80%;
 }
 .config tr td select{
     /* outline: none; */
+    width: 80%;
+}
+.config tr td select option{
+    /* outline: none; */
     width: 100%;
+    background: gold;
+    z-index: 99;
 }
