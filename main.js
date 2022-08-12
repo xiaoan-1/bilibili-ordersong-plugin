@@ -243,11 +243,11 @@ async function initConfig(){
     document.getElementById('getCaptcha').onclick = async function(e){
         let phone = document.getElementById('phone');  
         // 校验手机号格式 
-        var regExp = new RegExp("^1[3578]\\d{9}$");
+        var regExp = new RegExp("^1[35678]\\d{9}$");
         if(phone.value != "" && regExp.test(phone.value)){       
             let second = 30;
             // 发送验证码
-            let resp = await musicServer.sendCaptcha(config.phone);
+            let resp = await musicServer.sendCaptcha(config.phone?config.phone:phone.value);
             if(resp.code == 200){
                 // 若发送成功，则保存手机号到配置项和本地存储中
                 config.phone = phone.value;
