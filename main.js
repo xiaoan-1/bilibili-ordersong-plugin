@@ -4,7 +4,7 @@ window.onload = function(){
       
     // 2. 初始化配置项
     initConfig();
-
+    return;
     // 3. 初始化webSocket对象
     let initSuccess = initSocket();
     
@@ -160,9 +160,6 @@ const config = {
     // 歌曲黑名单
     songBlackList: [],
 
-    // 登录手机号
-    phone: null,
-
     // 用户登录的cookie
     cookie: null,
 }
@@ -188,20 +185,24 @@ async function initConfig(){
     }
 
     // 2. 加载空闲歌单
-    configMethod.loadSongList(config.songListId);
+    // configMethod.loadSongList(config.songListId);
 
     // 3. 获取用户登录状态
     let phone = document.getElementById('phone');
+    let captcha = document.getElementById('captcha'); 
+    let captchaBtn = document.getElementById('getCaptcha'); 
     if(config.cookie){ 
         let btnLogin = document.getElementById('login');
         // 获取登录的用户信息
         let loginStatus = await musicServer.loginStatus();
         if(loginStatus.code == 200){
-            // 获取当前cookie登录的手机号
+            // 获取当前cookie登录的手机号（隐藏信息）
             phone.value = loginStatus.account.userName; 
-            // 修改按钮标题
+            // 仅退出登录
+            phone.disabled = true;
+            captcha.disabled = true;
+            captchaBtn.style.display = "none";
             btnLogin.textContent = "退出登录";
-            phone.disable = "true";
         }
     }
     
@@ -236,34 +237,33 @@ async function initConfig(){
     }
 
     // 7. 绑定其他配置项按钮事件
-    let sendTimer;
+    let sendTimer = null;
+    let phoneNumber = null;
     // --获取验证码
-    document.getElementById('getCaptcha').onclick = async function(e){
-        let phone = document.getElementById('phone');  
+    captchaBtn.onclick = async function(e){
         // 校验手机号格式 
         var regExp = new RegExp("^1[35678]\\d{9}$");
         if(phone.value != "" && regExp.test(phone.value)){     
-            let second = 30;
             // 发送验证码
-            let resp = await musicServer.sendCaptcha(config.phone?config.phone:phone.value);
+            let resp = await musicServer.sendCaptcha(phone.value);
             if(resp.code == 200){
                 // 若发送成功，则保存手机号到配置项，用于登录时获取
-                config.phone = phone.value;
+                phoneNumber = phone.value;
                 musicMethod.pageAlert("发送成功!");
             }else{
                 // 发送失败，显示错误信息
                 musicMethod.pageAlert(resp.msg);
             }
-            // 发送后使按钮失效
-            e.target.setAttribute("disabled", true);
-            // 进行页面倒计时，30秒后可再次发送验证码
+            // 进行倒计时，30秒后可再次发送验证码
+            let second = 30;
+            e.target.disabled = true;
             e.target.textContent = second;
             sendTimer = setInterval(function(){
                 if(second > 0){
                     second--;
                     e.target.textContent = second;
                 }else{
-                    e.target.removeAttribute("disabled");
+                    e.target.disabled = false;
                     e.target.textContent = "获取验证码";
                     clearInterval(sendTimer);
                 }
@@ -274,20 +274,24 @@ async function initConfig(){
     }
     // --登录
     document.getElementById('login').onclick = async function(e){
-        let captcha = document.getElementById('captcha');  
         if(config.cookie == null){
             // 如果当前不存在cookie，则进行登录获取cookie
-            if(config.phone != null && captcha.value != ""){
+            if(phoneNumber != null && captcha.value != ""){
                  // 先校验验证码是否正确
-                let verify = await musicServer.verifyCaptcha(config.phone, captcha.value);
+                let verify = await musicServer.verifyCaptcha(phoneNumber, captcha.value);
                 if(verify.code == 200){
                     // 验证码正确，请求登录
-                    let loginData = await musicServer.login(config.phone, captcha.value);
+                    let loginData = await musicServer.login(phoneNumber, captcha.value);
                     // 保存cookie
                     config.cookie = loginData.cookie;
                     localStorage.setItem("cookie", config.cookie);
+                    // 手机号保护
+                    phone.value = "1_********" + phone.value.slice(8, 11);
+                    // 登录成功后禁用手机号验证码功能
+                    phone.disabled = true;
+                    captcha.value = "";
+                    captchaBtn.style.display = "none";
                     e.target.textContent = "退出登录";
-                    phone.disabled = "true";
                 }else{
                     musicMethod.pageAlert(verify.message);
                 }
@@ -300,12 +304,16 @@ async function initConfig(){
             musicServer.logout();
             // 清空手机号
             phone.value = "";
-            config.phone = null;
+            phoneNumber = null;
             // 删除本地cookie
             config.cookie = null;
             localStorage.removeItem("cookie");
+            // 启用手机号验证码功能
+            phone.value = "";
+            phone.disabled = false;
+            captcha.disabled = false;
+            captchaBtn.style.display = "";
             e.target.textContent = "登录";
-            phone.disabled = "";
             musicMethod.pageAlert("已退出登录!");
         }  
     }
@@ -1100,7 +1108,7 @@ const configMethod = {
         }else{
             musicMethod.pageAlert("歌单Id无效!");
         }
-    }
+    },
 }
 
 
