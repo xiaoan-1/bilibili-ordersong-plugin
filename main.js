@@ -4,7 +4,7 @@ window.onload = function(){
       
     // 2. 初始化配置项
     initConfig();
-    
+
     // 3. 初始化webSocket对象
     let initSuccess = initSocket();
     
@@ -171,9 +171,6 @@ async function initConfig(){
     for(let key in config){
         if(localStorage.getItem(key)){
             switch(key){
-                case 'phone':
-                    config[key] = localStorage.getItem(key);
-                    break;
                 case 'cookie':
                     config[key] = localStorage.getItem(key);
                     break;
@@ -194,15 +191,17 @@ async function initConfig(){
     configMethod.loadSongList(config.songListId);
 
     // 3. 获取用户登录状态
-    if(config.cookie){
+    let phone = document.getElementById('phone');
+    if(config.cookie){ 
         let btnLogin = document.getElementById('login');
+        // 获取登录的用户信息
         let loginStatus = await musicServer.loginStatus();
         if(loginStatus.code == 200){
-            if(loginStatus.account.status == 1){
-                btnLogin.textContent = "退出登录";
-            }else{
-                musicMethod.pageAlert("用户未登录");
-            }
+            // 获取当前cookie登录的手机号
+            phone.value = loginStatus.account.userName; 
+            // 修改按钮标题
+            btnLogin.textContent = "退出登录";
+            phone.disable = "true";
         }
     }
     
@@ -236,7 +235,6 @@ async function initConfig(){
         })
     }
 
-    
     // 7. 绑定其他配置项按钮事件
     let sendTimer;
     // --获取验证码
@@ -249,13 +247,12 @@ async function initConfig(){
             // 发送验证码
             let resp = await musicServer.sendCaptcha(config.phone?config.phone:phone.value);
             if(resp.code == 200){
-                // 若发送成功，则保存手机号到配置项和本地存储中
+                // 若发送成功，则保存手机号到配置项，用于登录时获取
                 config.phone = phone.value;
-                localStorage.setItem("phone", config.phone);
                 musicMethod.pageAlert("发送成功!");
             }else{
                 // 发送失败，显示错误信息
-                musicMethod.pageAlert(message);
+                musicMethod.pageAlert(resp.msg);
             }
             // 发送后使按钮失效
             e.target.setAttribute("disabled", true);
@@ -277,9 +274,9 @@ async function initConfig(){
     }
     // --登录
     document.getElementById('login').onclick = async function(e){
-        let captcha = document.getElementById('captcha');
-      
+        let captcha = document.getElementById('captcha');  
         if(config.cookie == null){
+            // 如果当前不存在cookie，则进行登录获取cookie
             if(config.phone != null && captcha.value != ""){
                  // 先校验验证码是否正确
                 let verify = await musicServer.verifyCaptcha(config.phone, captcha.value);
@@ -290,6 +287,7 @@ async function initConfig(){
                     config.cookie = loginData.cookie;
                     localStorage.setItem("cookie", config.cookie);
                     e.target.textContent = "退出登录";
+                    phone.disabled = "true";
                 }else{
                     musicMethod.pageAlert(verify.message);
                 }
@@ -297,21 +295,18 @@ async function initConfig(){
                 musicMethod.pageAlert("未输入手机号或者验证码！");
             }
         }else{
-            // 若当前存在cookie信息并继续登录，则检查当前登录状态
-            let loginStatus = await musicServer.loginStatus();
-            if(loginStatus.code == 200){
-                if(loginStatus.account.status == 1){
-                    // 若已登录，则退出登录并清空cookie
-                    musicServer.logout();
-                    config.cookie = null;
-                    e.target.textContent = "登录";
-                    musicMethod.pageAlert("已退出登录!");
-                }else{
-                    musicMethod.pageAlert("用户未登录");
-                }
-            }else{
-                musicMethod.pageAlert("获取登录状态失败!");
-            }  
+            // 若当前存在cookie信息，则进行退出登录
+            // 发送退出登录请求
+            musicServer.logout();
+            // 清空手机号
+            phone.value = "";
+            config.phone = null;
+            // 删除本地cookie
+            config.cookie = null;
+            localStorage.removeItem("cookie");
+            e.target.textContent = "登录";
+            phone.disabled = "";
+            musicMethod.pageAlert("已退出登录!");
         }  
     }
     // --加载歌单
@@ -337,6 +332,9 @@ async function initConfig(){
                 uid: parseInt(userHistory[userHistory.selectedIndex].value),
                 uname: userHistory[userHistory.selectedIndex].textContent
             });
+            // 添加完成后删除历史用户的记录
+            player.userHistory.splice(userHistory.selectedIndex,1);
+            userHistory.options[userHistory.selectedIndex].remove();
             localStorage.setItem("userBlackList", JSON.stringify(config.userBlackList));
         }else{
             musicMethod.pageAlert("历史用户为空!");
@@ -350,6 +348,9 @@ async function initConfig(){
                 sid: parseInt(songHistory[songHistory.selectedIndex].value),
                 sname: songHistory[songHistory.selectedIndex].textContent
             });
+            // 添加完成后删除历史歌曲的记录
+            player.songHistory.splice(songHistory.selectedIndex,1);
+            songHistory.options[songHistory.selectedIndex].remove();
             localStorage.setItem("songBlackList", JSON.stringify(config.songBlackList));
         }else{
             musicMethod.pageAlert("历史歌曲为空");
@@ -388,8 +389,8 @@ async function initConfig(){
     // --设置界面的显示与隐藏
     document.getElementById('setting').onclick = function(){
         let configPanel = document.getElementsByClassName('config')[0];
-        if(configPanel.clientHeight < 500){
-            configPanel.style.height = "600px";
+        if(configPanel.clientHeight < 1){
+            configPanel.style.height = "400px";
         }else{
             configPanel.style.height = "0px";
         }
@@ -679,7 +680,8 @@ var musicServer = {
                 cookie: config.cookie
             }
         }).then(function (resp) {
-            data = resp.data;
+            data = resp.data.data;
+
         });
         return data;
     },
@@ -1080,20 +1082,23 @@ const configMethod = {
     },
     // 加载空闲歌单
     loadSongList: async function(listId){
-        // 获取新的歌单
-        let songList = await musicServer.getSongList(listId);
-        if(songList.length > 0){
-            player.freeList = songList;
-            // 获取歌单成功后保存配置项
-            config.listId = listId;
-            localStorage.setItem("listId", config.listId);
-            // 加载完成后自动播放下一首
-            player.playNext();
-            musicMethod.pageAlert("已获取空闲歌单列表!");
-        }else{
-            setInterval(function(){
+        if(listId){
+            // 获取新的歌单
+            let songList = await musicServer.getSongList(listId);
+            if(songList.length > 0){
+                player.freeList = songList;
+                // 获取歌单成功后保存配置项
+                config.listId = listId;
+                localStorage.setItem("listId", config.listId);
+                document.getElementById('songListId').value = listId;
+                // 加载完成后自动播放下一首
+                player.playNext();
+                musicMethod.pageAlert("已获取空闲歌单列表!");
+            }else{
                 musicMethod.pageAlert("歌单列表获取失败!");
-            },7000); 
+            }
+        }else{
+            musicMethod.pageAlert("歌单Id无效!");
         }
     }
 }
