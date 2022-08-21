@@ -4,7 +4,7 @@ window.onload = function(){
       
     // 2. 初始化配置项
     initConfig();
-    return;
+
     // 3. 初始化webSocket对象
     let initSuccess = initSocket();
     
@@ -185,7 +185,7 @@ async function initConfig(){
     }
 
     // 2. 加载空闲歌单
-    // configMethod.loadSongList(config.songListId);
+    configMethod.loadSongList(config.songListId);
 
     // 3. 获取用户登录状态
     let phone = document.getElementById('phone');
