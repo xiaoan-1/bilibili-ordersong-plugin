@@ -242,7 +242,7 @@ async function initConfig(){
     // --获取验证码
     captchaBtn.onclick = async function(e){
         // 校验手机号格式 
-        var regExp = new RegExp("^1[35678]\\d{9}$");
+        var regExp = new RegExp("^1[356789]\\d{9}$");
         if(phone.value != "" && regExp.test(phone.value)){     
             // 发送验证码
             let resp = await musicServer.sendCaptcha(phone.value);
@@ -285,6 +285,8 @@ async function initConfig(){
                     // 保存cookie
                     config.cookie = loginData.cookie;
                     localStorage.setItem("cookie", config.cookie);
+                    // 登录成功后重新加载空闲歌单
+                    configMethod.loadSongList(config.songListId);
                     // 手机号保护
                     phone.value = "1_********" + phone.value.slice(8, 11);
                     // 登录成功后禁用手机号验证码功能
@@ -320,12 +322,11 @@ async function initConfig(){
     // --加载歌单
     document.getElementById('loadSongList').onclick = async function(e){
         let listId = parseInt(songListId.value);
-        if(listId && config.listId != listId){
+        if(listId && config.songListId != listId){
             configMethod.loadSongList(listId);
             // 设置防抖功能, 使按钮失效几秒
             e.target.setAttribute("disabled", true);
             setTimeout(function(){
-                console.log(e.target);
                 e.target.removeAttribute("disabled");
             }, 3000);
         }else{
@@ -468,6 +469,8 @@ function initSocket(){
     let heartInfo = "[object Object]"
     webSocket.heartPacket = packetMethod.createPacket(heartInfo, 1, 2, 1);
 
+    // 设置重连
+
     musicMethod.pageAlert("已初始化webSocket连接!");
     return true;
 }
@@ -478,7 +481,6 @@ function openWebSocket(){
     // 检查是否已存在socket连接
     if(webSocket.socket != null){
         webSocket.socket.close();
-        webSocket.socket = null;
     }
 
     // 建立新的socket连接
@@ -528,12 +530,18 @@ function openWebSocket(){
     socket.onclose = function () {
         // 停止发送心跳包
         clearInterval(webSocket.timer);
-        musicMethod.pageAlert("弹幕服务器连接已关闭!");
+        setInterval(function(){
+            musicMethod.pageAlert("连接已关闭!");
+        }, 7000)
     };
 
     // 4. 连接错误事件
     socket.onerror = function () {
-        musicMethod.pageAlert("连接到弹幕服务器发生了错误!")
+        // 停止发送心跳包
+        clearInterval(webSocket.timer);
+        setInterval(function(){
+            musicMethod.pageAlert("服务器发生了错误!")
+        }, 7000)
     }
 }
 
@@ -605,7 +613,9 @@ var musicServer = {
             }
         }).then(function (resp) {
             data = resp.data;
-        });
+        })/* .catch(function(error){
+            musicMethod.pageAlert(error.response);
+        }); */        
         return data;
     },
 
@@ -624,7 +634,9 @@ var musicServer = {
             }
         }).then(function (resp) {
             data = resp.data;
-        });
+        })/* .catch(function(error){
+            musicMethod.pageAlert(error.response);
+        }); */
         return data;
     },
 
@@ -643,7 +655,9 @@ var musicServer = {
             }
         }).then(function (resp) {
             data = resp.data;
-        });
+        })/* .catch(function(error){
+            musicMethod.pageAlert(error.response);
+        }); */
         return data;
     },
 
@@ -656,9 +670,9 @@ var musicServer = {
             params: {
                 cookie: config.cookie
             }
-        }).then(function (resp) {
-            data = resp.data;
-        });
+        })/* .catch(function(error){
+            musicMethod.pageAlert(error.response);
+        }); */
         return data;
     },
 
@@ -674,7 +688,9 @@ var musicServer = {
         }).then(function (resp) {
             data = resp.data;
             console.log(resp.data);
-        });
+        })/* .catch(function(error){
+            musicMethod.pageAlert(error.response);
+        }); */
         return data;
     },
 
@@ -689,8 +705,9 @@ var musicServer = {
             }
         }).then(function (resp) {
             data = resp.data.data;
-
-        });
+        })/* .catch(function(error){
+            musicMethod.pageAlert(error.response);
+        }); */
         return data;
     },
 
@@ -720,7 +737,9 @@ var musicServer = {
                     duration: songs[0].duration
                 });
             }
-        })
+        })/* .catch(function(error){
+            musicMethod.pageAlert(error.response);
+        }); */
         return song;
     },
 
@@ -737,10 +756,14 @@ var musicServer = {
                 id: songId
             }
         }).then(function (resp) {
-            if(resp.data.data[0].url){
+            if(resp.data.code < 0){
+                musicMethod.pageAlert(resp.data.message + "(登录)");
+            }else if(resp.data.data[0].url){
                 url = resp.data.data[0].url;
             }
-        })
+        })/* .catch(function(error){
+            musicMethod.pageAlert(error.response);
+        }); */
         return url;
     },
 
@@ -771,7 +794,9 @@ var musicServer = {
                 }
                 songList.push(song);
             }
-        })
+        }).catch(function(error){
+            musicMethod.pageAlert(error.response.data.message + "(登录)");
+        });
         return songList;
     },
     
@@ -1096,14 +1121,15 @@ const configMethod = {
             if(songList.length > 0){
                 player.freeList = songList;
                 // 获取歌单成功后保存配置项
-                config.listId = listId;
-                localStorage.setItem("listId", config.listId);
-                document.getElementById('songListId').value = listId;
+                config.songListId = listId;
+                localStorage.setItem("songListId", config.songListId);
+                document.getElementById('songListId').value = songListId;
                 // 加载完成后自动播放下一首
                 player.playNext();
                 musicMethod.pageAlert("已获取空闲歌单列表!");
             }else{
                 musicMethod.pageAlert("歌单列表获取失败!");
+               
             }
         }else{
             musicMethod.pageAlert("歌单Id无效!");
