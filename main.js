@@ -1123,7 +1123,7 @@ const configMethod = {
                 // 获取歌单成功后保存配置项
                 config.songListId = listId;
                 localStorage.setItem("songListId", config.songListId);
-                document.getElementById('songListId').value = songListId;
+                document.getElementById('songListId').value = listId;
                 // 加载完成后自动播放下一首
                 player.playNext();
                 musicMethod.pageAlert("已获取空闲歌单列表!");
