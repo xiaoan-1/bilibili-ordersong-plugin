@@ -156,6 +156,7 @@ body, html{
 .config{
     width: 500px;
     height: 0px;
+    font-size: larger;
     border-radius: 10px;
     overflow: auto;
     background: rgb(114, 114, 114);
