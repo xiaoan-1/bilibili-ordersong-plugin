@@ -13,7 +13,8 @@ b站直播姬点歌H5插件
 ![点歌界面](http://plugin.changsheng.space/images/%E7%82%B9%E6%AD%8C%E7%95%8C%E9%9D%A2.png)
 
 ## 设置面板
-![设置面板](http://plugin.changsheng.space/images/%E8%AE%BE%E7%BD%AE%E7%95%8C%E9%9D%A2.png)
+![设置面板1](http://plugin.changsheng.space/images/%E8%AE%BE%E7%BD%AE%E7%95%8C%E9%9D%A21.jpg)
+![设置面板1](http://plugin.changsheng.space/images/%E8%AE%BE%E7%BD%AE%E7%95%8C%E9%9D%A22.jpg)
 
 
 ## 提示信息

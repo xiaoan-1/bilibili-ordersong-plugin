@@ -5,10 +5,17 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>点歌列表</title>
-    <script src="./Lib/axios.min.js"></script>
-    <script src="./Lib/pako.js"></script>
-    <script src="./main.js"></script>
-    <link rel="stylesheet" href="./style.css">
+    <script src="../Lib/axios.min.js"></script>
+    <script src="../Lib/pako.js"></script>
+    <script src="../JS/apiServer/musicServer.js"></script>
+    <script src="../JS/apiServer/genshinVoiceServer.js"></script>
+    <script src="../JS/components/player.js"></script>
+    <script src="../JS/components/websoket.js"></script>
+    <script src="../JS/components/config.js"></script>
+    <script src="../JS/public/method.js"></script>
+    <script src="../JS/extension/genshinVoice.js"></script>
+    <script src="../JS/main.js"></script>
+    <link rel="stylesheet" href="../CSS/style.css">
 </head>
 <body>
     <div class="main">
@@ -33,43 +40,43 @@
         <div class="config">
             <table>
                 <tbody>
-                    <tr>
+                    <tr class="input">
                         <td>手机号：</td>
                         <td><input type="tel" id="phone"></td>
                         <td><button id="getCaptcha">获取验证码</button></td>
                     </tr>
-                    <tr>
+                    <tr class="input">
                         <td>验证码：</td>
                         <td><input type="tel" id="captcha"></td>
                         <td><button id="login">登录</button></td>
                     </tr>
-                    <tr>
+                    <tr class="input">
                         <td>管理员uid：</td>
                         <td><input type="text" id="adminId"></td>
                     </tr>
-                    <tr>
+                    <tr class="input">
                         <td>用户点歌数：</td>
                         <td><input type="text" id="userOrder"></td>
                     </tr>
-                    <tr>
+                    <tr class="input">
                         <td>最大点歌数：</td>
                         <td><input type="text" id="maxOrder"></td>
                     </tr>
-                    <tr>
+                    <tr class="input">
                         <td>最大歌曲时长：</td>
                         <td><input type="text" id="maxDuration"></td>
                     </tr>
-                    <tr>
+                    <tr class="input">
                         <td>空闲歌单ID：</td>
                         <td><input type="text" id="songListId"></td>
                         <td><button id="loadSongList">加载歌单</button></td>
                     </tr>
-                    <tr>
+                    <tr class="select">
                         <td>历史点歌用户：</td>
                         <td><select id="userHistory" size="4"></select></td>
                         <td><button id="addUserBlack">加入黑名单</button></td>
                     </tr>
-                    <tr>
+                    <tr class="select">
                         <td>用户黑名单：</td>
                         <td>
                             <select id="userBlackList" size="4">
@@ -77,12 +84,12 @@
                         </td>
                         <td><button id="delUserBlack">移除黑名单</button></td>
                     </tr>
-                    <tr>
+                    <tr class="select">
                         <td>历史点歌歌曲：</td>
                         <td><select id="songHistory" size="4"></select></td>
                         <td><button id="addSongBlack">加入黑名单</button></td>
                     </tr>
-                    <tr>
+                    <tr class="select">
                         <td>歌曲黑名单：</td>
                         <td>
                             <select id="songBlackList" size="4">

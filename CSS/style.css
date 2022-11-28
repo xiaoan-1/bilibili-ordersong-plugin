@@ -156,7 +156,7 @@ body, html{
 .config{
     width: 500px;
     height: 0px;
-    font-size: larger;
+    font-size: 20px;
     border-radius: 10px;
     overflow: auto;
     background: rgb(114, 114, 114);
@@ -171,8 +171,8 @@ body, html{
 }
 .config table{
     width: 500px;
-    height: 600px;
 }
+
 .config tr td{
     width: 150px;
 }
@@ -182,6 +182,7 @@ body, html{
 }
 .config tr td:nth-child(2){
     text-align: center;
+    position: relative;
 }
 .config tr td:nth-child(3){
     text-align: center;
@@ -194,12 +195,15 @@ body, html{
     outline: none;
     border: 1px white solid;
     border-radius: 5px;
+    font-size: large;
     background: rgb(187, 187, 187);
+    position: absolute;
+    transform: translate(-50%, -50%);
     transition: .5s;
 }
 
 .config tr td input:hover{
-    width: 130px;
+    width: 150px;
     box-shadow: 0px 0px 10px white;
     background: white;
 }
@@ -207,7 +211,8 @@ body, html{
 .config tr td select{
     /* outline: none; */
     width: 100%;
-    height: 50px;
+    height: 100px;
+    font-size: large;
     color: white;
     outline: none;
     background: rgb(187, 187, 187);
@@ -240,6 +245,13 @@ body, html{
     background: rgb(151, 151, 150);
 }
 
+.input{
+    height: 50px;
+}
+
+.select{
+    height: 120px;
+}
 /* 定义滚动条样式 */
 ::-webkit-scrollbar {
     width: 10px;
