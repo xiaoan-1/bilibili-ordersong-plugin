@@ -6,7 +6,7 @@ const voice = {
     timer: null,
 
     // 播放器音频角色
-    name: "可莉",
+    name: "魈",
 
     // 开关
     switch: false,
@@ -21,6 +21,8 @@ function InitVoice(){
         if(this.audio){
             this.audio.src = await genshinVoiceServer.getVoiceUrl(this.name);
             if(this.audio.src){
+                // 降低音乐的音量
+                player.audio.volume = 0.6;
                 this.audio.play();
             }else{
                 // 移除监听
@@ -34,6 +36,8 @@ function InitVoice(){
     }
 
     voice.timer = async function(){
+        // 播放结束后恢复音乐音量
+        player.audio.volume = 1;
         setTimeout(() => voice.play(), 5 * 1000);
     }
 }
@@ -54,14 +58,21 @@ function genshinVioce(userDanmu){
             }
         }else if(keyword == "关" && userDanmu.uid == config.adminId){
             if(voice.switch){
-                voice.audio.pause();
                 voice.switch = false;
+                // 关闭后暂停播放
+                voice.audio.pause();
                 // 移除监听
                 voice.audio.removeEventListener("ended", voice.timer);
             }
         }else{
-            // 设置角色
-            voice.name = keyword;
+            if(await genshinVoiceServer.getVoiceUrl(keyword)){
+                // 设置角色
+                voice.name = keyword;
+                // 启动播放切换角色
+                voice.play();
+            }else{
+                musicMethod.pageAlert("不认识~不认识@~@");
+            }
         }
     }
 }
