@@ -42,7 +42,7 @@ function InitVoice(){
     }
 }
 
-function genshinVioce(userDanmu){
+async function genshinVioce(userDanmu){
     let danmu = userDanmu.danmu.trim();
     
     if(danmu.slice(0, 2) == "配音"){
