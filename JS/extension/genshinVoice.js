@@ -38,7 +38,7 @@ function InitVoice(){
     voice.timer = async function(){
         // 播放结束后恢复音乐音量
         player.audio.volume = 1;
-        setTimeout(() => voice.play(), 5 * 1000);
+        setTimeout(() => voice.play(), 15 * 1000);
     }
 }
 
