@@ -20,7 +20,6 @@ b站直播姬点歌H5插件
 ## 提示信息
 ![提示1](http://plugin.changsheng.space/images/tip1.jpg)
 ![提示2](http://plugin.changsheng.space/images/tip2.jpg)
-![提示3](http://plugin.changsheng.space/images/tip3.jpg)
 
 
 
