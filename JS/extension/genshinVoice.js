@@ -22,7 +22,9 @@ function InitVoice(){
             this.audio.src = await genshinVoiceServer.getVoiceUrl(this.name);
             if(this.audio.src){
                 // 降低音乐的音量
-                player.audio.volume = 0.6;
+                if(player.audio.volume == 1){
+                    player.audio.volume = 0.5;
+                }
                 this.audio.play();
             }else{
                 // 移除监听
