@@ -22,7 +22,10 @@ const player = {
     songHistory: [],
 
     // 随机队列，防止随机重复
-    randomList: []
+    randomList: [],
+
+    // 歌曲播放时音量淡入，降低卡顿影响
+    playFadeIn: null,
 }
 function initPlayer(){
     // 创建音频对象
@@ -58,6 +61,25 @@ function initPlayer(){
         if(player.audio){
             this.audio.src = await musicServer.getSongUrl(songId);
             if(this.audio.src){
+                // 音量淡入
+                if(this.playFadeIn){
+                    clearInterval(this.playFadeIn);
+                    this.playFadeIn = null;
+                }
+                this.audio.volume = 0;
+                this.playFadeIn = setInterval(function(){
+                    /* 
+                        此处有两个注意点
+                        1. 此处若自增 0.1 会出现精度问题，0.1 + 0.2 不等于 0.3
+                        2. setInterval为全局函数，无法使用 this 指定对象
+                     */
+                    player.audio.volume = (player.audio.volume * 10 + 1) / 10;
+                    if(player.audio.volume == 1){
+                        clearInterval(player.playFadeIn);
+                        player.playFadeIn = null;
+                    }
+                }, 500);
+                // 播放
                 this.audio.play();
             }else{
                 musicMethod.pageAlert("歌曲链接被吃了>_<!");
