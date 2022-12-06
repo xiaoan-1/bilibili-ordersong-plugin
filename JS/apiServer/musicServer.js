@@ -17,9 +17,9 @@ const musicServer = {
             }
         }).then(function (resp) {
             data = resp.data;
-        })/* .catch(function(error){
-            musicMethod.pageAlert(error.response);
-        }); */        
+        }).catch(function(error){
+            musicMethod.pageAlert("sendCaptcha() error");
+        });        
         return data;
     },
 
@@ -38,9 +38,9 @@ const musicServer = {
             }
         }).then(function (resp) {
             data = resp.data;
-        })/* .catch(function(error){
-            musicMethod.pageAlert(error.response);
-        }); */
+        }).catch(function(error){
+            musicMethod.pageAlert("verifyCaptcha() error");
+        });
         return data;
     },
 
@@ -59,9 +59,9 @@ const musicServer = {
             }
         }).then(function (resp) {
             data = resp.data;
-        })/* .catch(function(error){
-            musicMethod.pageAlert(error.response);
-        }); */
+        }).catch(function(error){
+            musicMethod.pageAlert("logout() error");
+        });
         return data;
     },
 
@@ -74,9 +74,9 @@ const musicServer = {
             params: {
                 cookie: config.cookie
             }
-        })/* .catch(function(error){
-            musicMethod.pageAlert(error.response);
-        }); */
+        }).catch(function(error){
+            musicMethod.pageAlert("logout() error");
+        });
         return data;
     },
 
@@ -92,9 +92,9 @@ const musicServer = {
         }).then(function (resp) {
             data = resp.data;
             console.log(resp.data);
-        })/* .catch(function(error){
-            musicMethod.pageAlert(error.response);
-        }); */
+        }).catch(function(error){
+            musicMethod.pageAlert("getUserDetail() error");
+        });
         return data;
     },
 
@@ -109,9 +109,9 @@ const musicServer = {
             }
         }).then(function (resp) {
             data = resp.data.data;
-        })/* .catch(function(error){
-            musicMethod.pageAlert(error.response);
-        }); */
+        }).catch(function(error){
+            musicMethod.pageAlert("loginStatus() error");
+        });
         return data;
     },
 
@@ -141,9 +141,9 @@ const musicServer = {
                     duration: songs[0].duration
                 });
             }
-        })/* .catch(function(error){
-            musicMethod.pageAlert(error.response);
-        }); */
+        }).catch(function(error){
+            musicMethod.pageAlert("getSongInfo() error");
+        });
         return song;
     },
 
@@ -165,9 +165,9 @@ const musicServer = {
             }else if(resp.data.data[0].url){
                 url = resp.data.data[0].url;
             }
-        })/* .catch(function(error){
-            musicMethod.pageAlert(error.response);
-        }); */
+        }).catch(function(error){
+            musicMethod.pageAlert("getSongUrl() error");
+        });
         return url;
     },
 
