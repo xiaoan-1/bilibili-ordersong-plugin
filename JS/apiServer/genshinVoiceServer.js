@@ -18,9 +18,9 @@ const genshinVoiceServer = {
             if(resp.data.url){
                 url = resp.data.url;
             }
-        })/* .catch(function(error){
-            musicMethod.pageAlert(error.response);
-        }); */        
+        }).catch(function(error){
+            musicMethod.pageAlert("getVoiceUrl() error");
+        });        
         return url;
     },
 }
