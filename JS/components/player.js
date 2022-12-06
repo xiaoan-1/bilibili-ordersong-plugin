@@ -107,8 +107,8 @@ function initPlayer(){
                     {
                         // 在末尾添加随机记录
                         this.randomList.push(this.freeIndex);
-                        // 如果随机记录大于5个，就删除第一个，实现队列结构
-                        if(this.randomList.length > 5)
+                        // 如果随机记录大于一半，就删除第一个，实现队列结构
+                        if(this.randomList.length > this.freeList.length / 2)
                         {
                             this.randomList.shift();
                         }
