@@ -61,7 +61,7 @@ async function identifyDanmuCommand(userDanmu){
             musicMethod.pageAlert("不能切别人点的歌哦(^o^)");
         }
     }else{
-        genshinVioce(userDanmu);
+        test(userDanmu);
     }
 }
 
