@@ -7,9 +7,6 @@ window.onload = function(){
 
     // 3. 初始化webSocket对象
     let initSuccess = initSocket();
-    
-    // 扩展
-    InitVoice();
 
     // 4. 若初始化成功,打开websoket连接直播间
     if(initSuccess){
