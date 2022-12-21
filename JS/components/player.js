@@ -78,7 +78,7 @@ function initPlayer(){
                         clearInterval(player.playFadeIn);
                         player.playFadeIn = null;
                     }
-                }, 500);
+                }, 400);
                 // 播放
                 this.audio.play();
             }else{
