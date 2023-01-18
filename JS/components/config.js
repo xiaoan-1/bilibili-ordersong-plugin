@@ -11,8 +11,11 @@ const config = {
     maxOrder: 15,
 
     // 最大歌曲时长限制(单位秒)
-    maxDuration: 300,
-    
+    maxDuration: 240,
+
+    // 超过最大歌曲时长后限制播放的时间 (单位秒)，小于maxDuration
+    overLimit: 0,
+
     // 空闲歌单ID (登录网易云网站，获取歌单页面url结尾ID)
     songListId: 7319049505, 
     
@@ -89,14 +92,24 @@ async function initConfig(){
     }
 
     // 6. 设置实时修改部分配置项方法
-    let keys = ["adminId", "userOrder", "maxOrder", "maxDuration"];
+    let keys = ["adminId", "userOrder", "maxOrder", "maxDuration", "overLimit"];
     for(let i = 0; i < keys.length; i++){
         let elem = document.getElementById(keys[i]);
+        
         elem.value = config[keys[i]];
-        elem.addEventListener('keyup', function(){
+        elem.addEventListener("blur", function(e){
+            // 规定限制时长和超时限播时长的区间大于30
+            if (keys[i] == "maxDuration" && e.target.value < 30)
+            {
+                e.target.value = 30;
+                musicMethod.pageAlert(`请输入大于30的数值!!!`);  
+            }else if(keys[i] == "overLimit" && ((e.target.value != 0 && e.target.value < 30) || e.target.value > config.maxDuration)){
+                e.target.value = 30;
+                musicMethod.pageAlert(`请输入0或者30-${config.maxDuration}以内的数值!!!`);  
+            }
             // 保存配置
-            config[keys[i]] = parseInt(elem.value);
-            localStorage.setItem(keys[i], elem.value);
+            config[keys[i]] = parseInt(e.target.value);
+            localStorage.setItem(keys[i], e.target.value);
         })
     }
 

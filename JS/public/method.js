@@ -57,8 +57,8 @@ const musicMethod = {
             // 判断该歌曲是否已在点歌列表
             this.pageAlert("已经点上啦!>_<!");
             return false;
-        } else if(order.song.duration > config.maxDuration * 1000){
-            // 该歌曲是否超出时长
+        } else if(config.overLimit <= 0 && order.song.duration > config.maxDuration){
+            // 该歌曲是否无歌曲限制，且歌曲时长超出规定,
             this.pageAlert("你点的歌时太长啦!>_<");
             return false
         }else if(!await musicServer.getSongUrl(order.song.sid)){

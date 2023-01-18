@@ -78,7 +78,7 @@ function initPlayer(){
                         clearInterval(player.playFadeIn);
                         player.playFadeIn = null;
                     }
-                }, 400);
+                }, 300);
                 // 播放
                 this.audio.play();
             }else{
@@ -145,6 +145,14 @@ function initPlayer(){
     // 3. 播放时间更新事件
     player.audio.addEventListener("timeupdate", function () {
         let progress = document.getElementsByClassName('progress_bar')[0];
+        /*  1、歌曲时长超时
+            2、超时限播时长 > 30
+            3、当前播放时间 >= 超时限播时间
+            则切换下一首歌曲 
+        */
+        if (player.audio.duration > config.maxDuration && config.overLimit >= 30 && player.audio.currentTime >= config.overLimit) {
+            player.playNext();
+        }
         // 页面进度条实时修改
         progress.style.width = ((player.audio.currentTime / player.audio.duration) * 280) + "px";
     });
