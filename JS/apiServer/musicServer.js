@@ -18,7 +18,7 @@ const musicServer = {
         }).then(function (resp) {
             data = resp.data;
         }).catch(function(error){
-            musicMethod.pageAlert("sendCaptcha() error");
+            musicMethod.pageAlert(error.response.data.message);
         });        
         return data;
     },
@@ -39,7 +39,7 @@ const musicServer = {
         }).then(function (resp) {
             data = resp.data;
         }).catch(function(error){
-            musicMethod.pageAlert("verifyCaptcha() error");
+            musicMethod.pageAlert(error.response.data.message);
         });
         return data;
     },
@@ -60,7 +60,7 @@ const musicServer = {
         }).then(function (resp) {
             data = resp.data;
         }).catch(function(error){
-            musicMethod.pageAlert("logout() error");
+            musicMethod.pageAlert(error.response.data.message);
         });
         return data;
     },
@@ -75,7 +75,7 @@ const musicServer = {
                 cookie: config.cookie
             }
         }).catch(function(error){
-            musicMethod.pageAlert("logout() error");
+            musicMethod.pageAlert(error.response.data.message);
         });
         return data;
     },
@@ -93,7 +93,7 @@ const musicServer = {
             data = resp.data;
             console.log(resp.data);
         }).catch(function(error){
-            musicMethod.pageAlert("getUserDetail() error");
+            musicMethod.pageAlert(error.response.data.message);
         });
         return data;
     },
@@ -110,7 +110,7 @@ const musicServer = {
         }).then(function (resp) {
             data = resp.data.data;
         }).catch(function(error){
-            musicMethod.pageAlert("loginStatus() error");
+            musicMethod.pageAlert(error.response.data.message);
         });
         return data;
     },
@@ -142,7 +142,7 @@ const musicServer = {
                 });
             }
         }).catch(function(error){
-            musicMethod.pageAlert("getSongInfo() error");
+            musicMethod.pageAlert(error.response.data.message);
         });
         return song;
     },
@@ -166,7 +166,7 @@ const musicServer = {
                 url = resp.data.data[0].url;
             }
         }).catch(function(error){
-            musicMethod.pageAlert("getSongUrl() error");
+            musicMethod.pageAlert(error.response.data.message);
         });
         return url;
     },
@@ -199,7 +199,7 @@ const musicServer = {
                 songList.push(song);
             }
         }).catch(function(error){
-            musicMethod.pageAlert(error.response.data.message + "(登录)");
+            musicMethod.pageAlert(error.response.data.message);
         });
         return songList;
     },

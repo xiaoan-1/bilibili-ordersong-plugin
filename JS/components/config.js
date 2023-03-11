@@ -17,7 +17,7 @@ const config = {
     overLimit: 0,
 
     // 空闲歌单ID (登录网易云网站，获取歌单页面url结尾ID)
-    songListId: 7319049505, 
+    songListId: 7294328248, 
     
     // 用户黑名单
     userBlackList: [],
@@ -115,7 +115,6 @@ async function initConfig(){
 
     // 7. 绑定其他配置项按钮事件
     let sendTimer = null;
-    let phoneNumber = null;
     // --获取验证码
     captchaBtn.onclick = async function(e){
         // 校验手机号格式 
@@ -125,7 +124,6 @@ async function initConfig(){
             let resp = await musicServer.sendCaptcha(phone.value);
             if(resp.code == 200){
                 // 若发送成功，则保存手机号到配置项，用于登录时获取
-                phoneNumber = phone.value;
                 musicMethod.pageAlert("发送成功!");
             }else{
                 // 发送失败，显示错误信息
@@ -153,12 +151,12 @@ async function initConfig(){
     document.getElementById('login').onclick = async function(e){
         if(config.cookie == null){
             // 如果当前不存在cookie，则进行登录获取cookie
-            if(phoneNumber != null && captcha.value != ""){
+            if(phone.value != null && captcha.value != ""){
                  // 先校验验证码是否正确
-                let verify = await musicServer.verifyCaptcha(phoneNumber, captcha.value);
+                let verify = await musicServer.verifyCaptcha(phone.value, captcha.value);
                 if(verify.code == 200){
                     // 验证码正确，请求登录
-                    let loginData = await musicServer.login(phoneNumber, captcha.value);
+                    let loginData = await musicServer.login(phone.value, captcha.value);
                     // 保存cookie
                     config.cookie = loginData.cookie;
                     localStorage.setItem("cookie", config.cookie);
