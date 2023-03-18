@@ -17,6 +17,11 @@ const webSocket = {
 
     // 心跳包
     heartPacket: null,
+
+    // 是否正在重连、重连次数
+    flag: false,
+    reconnect: 3,
+
 }
 function initSocket(){
     // 检查浏览器是否支持webSocket 
@@ -120,18 +125,50 @@ function openWebSocket(){
     socket.onclose = function () {
         // 停止发送心跳包
         clearInterval(webSocket.timer);
-        setInterval(function(){
-            musicMethod.pageAlert("连接已关闭!");
-        }, 7000)
+        if(!webSocket.flag)
+        {
+            webSocket.flag = true;
+            if(webSocket.reconnect )
+            {
+                musicMethod.pageAlert("连接已关闭，正在重连..." + webSocket.reconnect );
+                openWebSocket();
+                webSocket.reconnect--;
+            }
+            else
+            {
+                setInterval(function(){
+                    musicMethod.pageAlert("重连失败! 连接已关闭!");
+                }, 7000);
+            }
+            webSocket.flag = false;
+        }else{
+            return;
+        }
     };
 
     // 4. 连接错误事件
     socket.onerror = function () {
         // 停止发送心跳包
         clearInterval(webSocket.timer);
-        setInterval(function(){
-            musicMethod.pageAlert("服务器发生了错误!")
-        }, 7000)
+        if(!webSocket.flag)
+        {
+            webSocket.flag = true;
+            if(webSocket.reconnect )
+            {
+                musicMethod.pageAlert("服务器发生错误，正在重连..." + webSocket.reconnect );
+                openWebSocket();
+                webSocket.reconnect--;
+            }
+            else
+            {
+                setInterval(function(){
+                    musicMethod.pageAlert("重连失败! 连接已关闭!");
+                }, 7000);
+            }
+            webSocket.flag = false;
+        }else{
+            return;
+        }
     }
 }
 
