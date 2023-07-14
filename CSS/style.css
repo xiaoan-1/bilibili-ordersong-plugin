@@ -9,6 +9,21 @@ body, html{
     justify-content: center;
 }
 
+/* 二维码 */
+#qrImg{
+    width: 200px;
+    height: 200px;
+    border-radius: 5px;
+    display: none;
+    box-shadow: 0px 0px 20px black;
+    z-index: 4;
+    left: 50%;
+    top: 200px;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    transition: .5s;
+}
+
 .orderTable{
     width: 300px;
     margin-top: 20px;
@@ -183,6 +198,9 @@ body, html{
 .config tr td:nth-child(2){
     text-align: center;
     position: relative;
+}
+.config tr td:nth-child(2) > input{
+    text-align: center;
 }
 .config tr td:nth-child(3){
     text-align: center;

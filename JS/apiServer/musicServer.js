@@ -64,6 +64,78 @@ const musicServer = {
         });
         return data;
     },
+    /*
+        游客登录
+     */
+    anyoneLogin: async function(){
+        let data;
+        await axios({
+            method: "get",
+            url: this.baseUrl + "/register/anonimous",
+        }).then(function (resp) {
+            data = resp.data;
+        }).catch(function(error){
+            musicMethod.pageAlert(error.response.data.message);
+        });
+        return data;
+    },
+    /* 
+        获取二维码key
+    */
+    getQrKey: async function(){
+        let unikey;
+        await axios({
+            method: "get",
+            url: this.baseUrl + "/login/qr/key",
+            params:{
+                timestamp: Date.now(),
+            }
+        }).then(function (resp) {
+            unikey = resp.data.data.unikey;
+        }).catch(function(error){
+            musicMethod.pageAlert(error.response.data.message);
+        });
+        return unikey;
+    },
+    /* 
+        获取二维码图片
+    */
+    getQrPicture: async function(key){
+        let qrImgUrl;
+        await axios({
+            method: "get",
+            url: this.baseUrl + "/login/qr/create",
+            params: {
+                key: key,
+                qrimg: true,
+                timestamp: Date.now(),
+            }
+        }).then(function (resp) {
+            qrImgUrl = resp.data.data.qrimg;
+        }).catch(function(error){
+            musicMethod.pageAlert(error.response.data.message);
+        });
+        return qrImgUrl;
+    },
+    /*
+        检查二维码扫描状态
+    */
+    checkQrStatus: async function(key){
+        let data;
+        await axios({
+            method: "get",
+            url: this.baseUrl + "/login/qr/check",
+            params: {
+                key: key,
+                timestamp: Date.now(),
+            }
+        }).then(function (resp) {
+            data = resp.data;
+        }).catch(function(error){
+            musicMethod.pageAlert(error.response.data.message);
+        });
+        return data;
+    },
 
     /* 退出登录 */
     logout: async function(){

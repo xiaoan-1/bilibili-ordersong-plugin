@@ -115,7 +115,8 @@ async function initConfig(){
 
     // 7. 绑定其他配置项按钮事件
     let sendTimer = null;
-    // --获取验证码
+    // --获取验证码（已失效）
+    captchaBtn.setAttribute("disabled", true);
     captchaBtn.onclick = async function(e){
         // 校验手机号格式 
         var regExp = new RegExp("^1[356789]\\d{9}$");
@@ -147,7 +148,8 @@ async function initConfig(){
             musicMethod.pageAlert("手机号不正确!");
         }
     }
-    // --登录
+    // --手机号登录（已失效）
+    document.getElementById('login').setAttribute("disabled", true);
     document.getElementById('login').onclick = async function(e){
         if(config.cookie == null){
             // 如果当前不存在cookie，则进行登录获取cookie
@@ -194,6 +196,64 @@ async function initConfig(){
             musicMethod.pageAlert("已退出登录!");
         }  
     }
+    // --二维码登录
+    document.getElementById('qrLogin').onclick = async function(e){
+        if(config.cookie == null){
+            // 首先要获取二维码的key
+            let unikey = await musicServer.getQrKey();
+            // 用二维码key获取二维码图片
+            let url = await musicServer.getQrPicture(unikey);
+
+            // 显示二维码
+            let qrImg = document.getElementById('qrImg'); 
+            qrImg.style.display = "block";
+            qrImg.setAttribute("src", url);
+            
+            // 轮询二维码状态
+            let check = setInterval(async () => {
+                let data = await musicServer.checkQrStatus(unikey);
+                if (!data) {
+                    qrImg.style.display = "none";
+                    musicMethod.pageAlert("请求失败!");
+                    clearInterval(check);
+                }
+                if(data.code == 800){
+                    // 二维码过期
+                    qrImg.style.display = "none";
+                    musicMethod.pageAlert("二维码已过期");
+                    clearInterval(check);
+                }else if(data.code == 803){
+                    // 授权成功
+                    qrImg.style.display = "none";
+                    // 保存cookie
+                    config.cookie = data.cookie;
+                    localStorage.setItem("cookie", config.cookie);
+                    // 登录成功后重新加载空闲歌单
+                    configMethod.loadSongList(config.songListId);
+                    e.target.textContent = "退出登录";
+                    musicMethod.pageAlert("登录成功");
+                    // 清除定时器
+                    clearInterval(check);
+                }
+            }, 3000)
+
+        }else{
+            // 若当前存在cookie信息，则进行退出登录
+            // 发送退出登录请求
+            musicServer.logout();
+            // 清空手机号
+            phone.value = "";
+            phoneNumber = null;
+            // 删除本地cookie
+            config.cookie = null;
+            document.cookie = "";
+            localStorage.removeItem("cookie");
+            // 启用手机号验证码功能
+            e.target.textContent = "登录";
+            musicMethod.pageAlert("已退出登录!");
+        }  
+    };
+
     // --加载歌单
     document.getElementById('loadSongList').onclick = async function(e){
         let listId = parseInt(songListId.value);
@@ -273,10 +333,12 @@ async function initConfig(){
     // --设置界面的显示与隐藏
     document.getElementById('setting').onclick = function(){
         let configPanel = document.getElementsByClassName('config')[0];
+        let qrImg = document.getElementById('qrImg'); 
         if(configPanel.clientHeight < 1){
             configPanel.style.height = "400px";
         }else{
             configPanel.style.height = "0px";
+            qrImg.style.display = "none";
         }
     } 
     musicMethod.pageAlert("已初始化配置项");
