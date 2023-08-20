@@ -33,7 +33,7 @@ function initPlayer(){
     // 绑定页面元素
     player.elem = document.getElementById('songList');
 
-    // 添加点歌方法
+    // 添加点歌
     player.addOrder = function(order){
         // 添加点歌信息到点歌列表中
         this.orderList.push(order);
@@ -48,18 +48,19 @@ function initPlayer(){
         configMethod.addUserHistory({
             uid: order.uid,
             uname: order.uname 
-        })
+        });
         // 添加歌曲历史记录
-        configMethod.addSongHistory({
-            sid: order.song.sid,
-            sname: order.song.sname
-        })
+        configMethod.addSongHistory(order.song);
        
     }
-    // 播放歌曲方法
-    player.play = async function(songId){
+    // 播放歌曲
+    player.play = async function(song){
         if(player.audio){
-            this.audio.src = await musicServer.getSongUrl(songId);
+            if(song.platform && song.platform == "qq"){
+                this.audio.src = await qqmusicServer.getSongUrl(song.sid);
+            }else{
+                this.audio.src = await musicServer.getSongUrl(song.sid);
+            }
             if(this.audio.src){
                 // 音量淡入
                 if(this.playFadeIn){
@@ -88,7 +89,7 @@ function initPlayer(){
             musicMethod.pageAlert("播放器未初始化!");
         }
     }
-    // 播放下一首方法
+    // 播放下一首
     player.playNext = function(){
         // 播放下一首时，如果点歌列表存在歌曲，则删除第一首
         if(this.orderList.length > 0){
@@ -116,13 +117,13 @@ function initPlayer(){
                     }
                 }
                 this.addOrder(this.freeList[this.freeIndex++]);
-                this.play(this.orderList[0].song.sid);
+                this.play(this.orderList[0].song);
             }else{
                 musicMethod.pageAlert("没有下一首可以放了>_<!");
             }
         }else {           
             // 播放删除后的当前第一首歌曲
-            this.play(this.orderList[0].song.sid)
+            this.play(this.orderList[0].song)
         }
     }
 

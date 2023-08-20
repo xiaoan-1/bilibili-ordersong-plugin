@@ -196,7 +196,7 @@ async function initConfig(){
             musicMethod.pageAlert("已退出登录!");
         }  
     }
-    // --二维码登录
+    // --网易二维码登录
     document.getElementById('qrLogin').onclick = async function(e){
         if(config.cookie == null){
             // 首先要获取二维码的key
@@ -253,7 +253,10 @@ async function initConfig(){
             musicMethod.pageAlert("已退出登录!");
         }  
     };
-
+    // --QQ音乐设置cookie（仅临时设置）
+    document.getElementById('qSetCookie').onclick = async function(e){
+        qqmusicServer.setCookie(document.getElementById('cookie').value);
+    };
     // --加载歌单
     document.getElementById('loadSongList').onclick = async function(e){
         let listId = parseInt(songListId.value);

@@ -20,12 +20,20 @@ window.onload = function(){
 */
 async function identifyDanmuCommand(userDanmu){
     let danmu = userDanmu.danmu.trim();
+    if(!musicMethod.checkUser(userDanmu.uid)){
+        return;
+    }
     // 点歌命令，触发点歌流程
-    if (danmu.slice(0, 2) == "点歌" && musicMethod.checkUser(userDanmu.uid)) {
+    if (danmu.slice(0, 2) == "点歌") {
         // 获取点歌关键词
         let keyword = danmu.slice(2).trim();
         // 根据关键词通过API查询歌曲信息
-        let song = await musicServer.getSongInfo(keyword);  
+        let song = null;
+        if(keyword.slice(0, 2) == 'qq'){
+            song = await qqmusicServer.getSongInfo(keyword.slice(2).trim());  
+        }else{
+            song = await musicServer.getSongInfo(keyword);  
+        }
         if(song){
             // 封装点歌信息
             let order = {
@@ -44,7 +52,7 @@ async function identifyDanmuCommand(userDanmu){
             }            
             // 如果当前播放没有播放歌曲，则开始播放第一首歌
             if(player.audio.paused && player.orderList.length > 0){
-                player.play(player.orderList[0].song.sid);
+                player.play(player.orderList[0].song);
             }
         }else{
             musicMethod.pageAlert("挺好听的，虽然我没找到<(▰˘◡˘▰)>");
