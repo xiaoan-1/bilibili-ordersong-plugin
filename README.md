@@ -9,8 +9,8 @@ b站直播姬点歌H5插件
    - 观众可以切换当前自己所点且正在播放的歌曲，无权限切其他人的歌曲
    - 管理员可以切换任何人的歌曲
 ## 使用简介
-个人公益链接（若无法使用请自行搭建） http://plugin.changsheng.space/plugin?roomid=你的直播间ID
-    该链接无QQ音乐API，若需要请自行搭建
+个人公益链接（若无法使用请自行搭建对应API服务） 
+http://plugin.changsheng.space/plugin?roomid=你的直播间ID
 
 直播姬和obs选择添加浏览器插件
 

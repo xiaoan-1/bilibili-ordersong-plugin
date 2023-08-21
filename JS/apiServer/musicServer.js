@@ -283,7 +283,7 @@ const musicServer = {
 const qqmusicServer = {
     
     // https://github.com/jsososo/QQMusicApi
-    baseUrl: "",
+    baseUrl: "http://121.40.145.21:33422",
     /* 搜索歌曲信息 
         @param keyword 关键词
     */
