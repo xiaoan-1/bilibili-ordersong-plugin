@@ -324,14 +324,14 @@ const qqmusicServer = {
         let url = null;
         await axios({
             method: "get",
-            url: this.baseUrl + "/song/urls",
+            url: this.baseUrl + "/song/url",
             params: {
                 id: songmid
             }
         }).then(function (resp) {
             if(resp.data.result == 100){
                 // 获取对象的所有键
-                url = Object.values(resp.data.data)[0];
+                url = resp.data.data;
             }else{
                 console.log(resp.data);
                 musicMethod.pageAlert("链接获取失败");

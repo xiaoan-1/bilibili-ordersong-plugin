@@ -255,7 +255,9 @@ async function initConfig(){
     };
     // --QQ音乐设置cookie（仅临时设置）
     document.getElementById('qSetCookie').onclick = async function(e){
-        qqmusicServer.setCookie(document.getElementById('cookie').value);
+        let cookie = document.getElementById('cookie')
+        qqmusicServer.setCookie(cookie.value);
+        cookie.value = "";
     };
     // --加载歌单
     document.getElementById('loadSongList').onclick = async function(e){
