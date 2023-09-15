@@ -1,3 +1,8 @@
+import { config } from "../components/config.js";
+import { musicMethod } from "../public/method.js";
+
+export{ musicServer, qqmusicServer}
+
 /* 歌曲API服务 */
 const musicServer = {
     
@@ -206,12 +211,13 @@ const musicServer = {
             let songs = resp.data.result.songs;
             if(songs.length > 0){
                 // 封装歌曲信息
-                song = musicMethod.getSongObject({
+                song = {
+                    platform: "wy",
                     sid: songs[0].id,
                     sname: songs[0].name,
                     sartist:songs[0].artists[0].name,
-                    duration: songs[0].duration
-                });
+                    duration: songs[0].duration / 1000 ,
+                };
             }
         }).catch(function(error){
             musicMethod.pageAlert(error.response.data.message);
@@ -263,6 +269,7 @@ const musicServer = {
                     uid: 123456,
                     uname: "空闲歌单",
                     song: {
+                        platform: "wy",
                         sid: songs[i].id,
                         sname:songs[i].name,
                         sartist:songs[i].ar[0].name
@@ -276,4 +283,104 @@ const musicServer = {
         return songList;
     },
     
+}
+
+const qqmusicServer = {
+    
+    // https://github.com/jsososo/QQMusicApi
+    baseUrl: "http://121.40.145.21:33422",
+    /* 搜索歌曲信息 
+        @param keyword 关键词
+    */
+    getSongInfo: async function(keyword){
+        let song = null;
+        await axios({
+            method: "get",
+            url: this.baseUrl +"/search",
+            params: {
+                key: keyword,
+                pageSize: 5,
+                pageNo: 1,
+                t:0
+            }
+        }).then(function (resp) {
+            // 获取歌曲列表
+            let songs = resp.data.data.list;
+            if(songs.length > 0){
+                // 封装歌曲信息
+                song = {
+                    platform: "qq",
+                    sid: songs[0].songmid,
+                    sname: songs[0].songname,
+                    sartist:songs[0].singer[0].name,
+                    duration: songs[0].interval
+                };
+            }
+        }).catch(function(error){
+            musicMethod.pageAlert(error);
+        });
+        return song;
+    },
+
+    /* 获取播放链接
+        @param    
+    */
+    getSongUrl: async function(songmid){
+        let url = null;
+        await axios({
+            method: "get",
+            url: this.baseUrl + "/song/url",
+            params: {
+                id: songmid
+            }
+        }).then(function (resp) {
+            if(resp.data.result == 100){
+                // 获取对象的所有键
+                url = resp.data.data;
+            }else{
+                console.log(resp.data);
+                musicMethod.pageAlert("链接获取失败");
+            }
+        }).catch(function(error){
+            musicMethod.pageAlert(error.message);
+        });
+        return url;
+    },
+
+    /* 设置cookie
+        param qqcookie QQ音乐cookie
+    */
+    setCookie: async function(cookie){
+        await axios({
+            method: "post",
+            url: this.baseUrl + "/user/setCookie",
+            data: {
+                data: cookie,
+            },
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        }).then(function (resp) {
+            musicMethod.pageAlert("cookie设置成功！");
+            
+        }).catch(function(error){
+            musicMethod.pageAlert("cookie设置失败！");
+        });
+    },
+    /* 获取cookie
+        param qq qq号
+    */
+    getCookie: async function(qq){
+        await axios({
+            method: "get",
+            url: this.baseUrl + "/user/getCookie",
+            params: {
+                id: qq,
+            },
+        }).then(function (resp) {
+            musicMethod.pageAlert("获取cookie成功！");
+        }).catch(function(error){
+            musicMethod.pageAlert("获取cookie失败！");
+        });
+    },
 }
