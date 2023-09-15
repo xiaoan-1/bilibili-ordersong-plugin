@@ -1,3 +1,8 @@
+import { config } from "../components/config.js";
+import { musicMethod } from "../public/method.js";
+
+export{ musicServer, qqmusicServer}
+
 /* 歌曲API服务 */
 const musicServer = {
     
