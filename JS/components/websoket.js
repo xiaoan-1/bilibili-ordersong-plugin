@@ -305,6 +305,7 @@ export const webSocket = {
             }
             if(!song){
                 musicMethod.pageAlert("挺好听的，虽然我没找到<(▰˘◡˘▰)>");
+                return;
             }
             // 封装点歌信息
             order = {
@@ -324,7 +325,7 @@ export const webSocket = {
                 player.playNext();
             }
         }
-        // 切歌   
+        // 切歌
         if (danmu == "切歌") { 
             // 切歌命令，触发切歌流程
             if(player.orderList[0].uid == userDanmu.uid || userDanmu.uid == config.adminId){
