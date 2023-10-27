@@ -44,16 +44,20 @@ export const player = {
             return;
         }
         // 根据歌曲信息，获取歌曲链接
+        let url = null;
         if(song.platform && song.platform == "qq"){
-            this.audio.src = await qqmusicServer.getSongUrl(song.sid);
+            url = await qqmusicServer.getSongUrl(song.sid);
         }else{
-            this.audio.src = await musicServer.getSongUrl(song.sid);
+            url = await musicServer.getSongUrl(song.sid);
         }
         // 检查歌曲链接
-        if(!this.audio.src){
+        if(!url){
             musicMethod.pageAlert("歌曲链接被吃掉了>_<!");
             return;
         }
+        /* ??????????为什么 audio.src = null 会得出奇怪的结果???????? */
+        this.audio.src = url;
+
         /*----------------------------音量淡入-------------------------------*/
         if(this.playFadeIn){
             clearInterval(this.playFadeIn);
