@@ -13,7 +13,7 @@ const musicServer = {
         @param phone 手机号
     */
     sendCaptcha: async function(phone){
-        let data;
+        let data = null;
         await axios({
             method: "get",
             url: this.baseUrl + "/captcha/sent",
@@ -23,6 +23,7 @@ const musicServer = {
         }).then(function (resp) {
             data = resp.data;
         }).catch(function(error){
+            data = null;
             console.log("验证码发送失败!", error.response.data);
         });        
         return data;
@@ -33,7 +34,7 @@ const musicServer = {
        @param captcha 验证码
     */
     verifyCaptcha: async function(phone, captcha){
-        let data;
+        let data = null;
         await axios({
             method: "get",
             url: this.baseUrl + "/captcha/verify",
@@ -44,6 +45,7 @@ const musicServer = {
         }).then(function (resp) {
             data = resp.data;
         }).catch(function(error){
+            data = null;
             console.log("验证码校验失败!", error.response.data);
         });
         return data;
@@ -54,7 +56,7 @@ const musicServer = {
        @param captcha 验证码
      */
     login: async function(phone, captcha){
-        let data;
+        let data = null;
         await axios({
             method: "get",
             url: this.baseUrl + "/login/cellphone",
@@ -65,6 +67,7 @@ const musicServer = {
         }).then(function (resp) {
             data = resp.data;
         }).catch(function(error){
+            data = null;
             console.log("登录失败!", error.response.data);
         });
         return data;
@@ -73,13 +76,14 @@ const musicServer = {
         游客登录
      */
     anyoneLogin: async function(){
-        let data;
+        let data = null;
         await axios({
             method: "get",
             url: this.baseUrl + "/register/anonimous",
         }).then(function (resp) {
             data = resp.data;
         }).catch(function(error){
+            data = null;
             console.log("游客登录失败！", error.response.data);
         });
         return data;
@@ -88,7 +92,7 @@ const musicServer = {
         获取二维码key
     */
     getQrKey: async function(){
-        let unikey;
+        let unikey = null;
         await axios({
             method: "get",
             url: this.baseUrl + "/login/qr/key",
@@ -98,6 +102,7 @@ const musicServer = {
         }).then(function (resp) {
             unikey = resp.data.data.unikey;
         }).catch(function(error){
+            unikey = null;
             console.log("获取二维码key失败!", error.response.data);
         });
         return unikey;
@@ -106,7 +111,7 @@ const musicServer = {
         获取二维码图片
     */
     getQrPicture: async function(key){
-        let qrImgUrl;
+        let qrImgUrl = null;
         await axios({
             method: "get",
             url: this.baseUrl + "/login/qr/create",
@@ -118,6 +123,7 @@ const musicServer = {
         }).then(function (resp) {
             qrImgUrl = resp.data.data.qrimg;
         }).catch(function(error){
+            qrImgUrl = null;
             console.log("二维码图片获取失败!", error.response.data);
         });
         return qrImgUrl;
@@ -126,7 +132,7 @@ const musicServer = {
         检查二维码扫描状态
     */
     checkQrStatus: async function(key){
-        let data;
+        let data = null;
         await axios({
             method: "get",
             url: this.baseUrl + "/login/qr/check",
@@ -137,6 +143,7 @@ const musicServer = {
         }).then(function (resp) {
             data = resp.data;
         }).catch(function(error){
+            data = null;
             console.log("获取二维码扫描状态失败!", error.response.data);
         });
         return data;
@@ -144,7 +151,7 @@ const musicServer = {
 
     /* 退出登录 */
     logout: async function(){
-        let data;
+        let data = null;
         await axios({
             method: "get",
             url: this.baseUrl + "/logout",
@@ -152,6 +159,7 @@ const musicServer = {
                 cookie: config.cookie
             }
         }).catch(function(error){
+            data = null;
             console.log("退出登录失败！", error.response.data);
         });
         return data;
@@ -159,7 +167,7 @@ const musicServer = {
 
     /* 获取用户详情 */
     getUserDetail: async function(){
-        let data;
+        let data = null;
         await axios({
             method: "get",
             url: this.baseUrl + "/user/account",
@@ -170,6 +178,7 @@ const musicServer = {
             data = resp.data;
             console.log(resp.data);
         }).catch(function(error){
+            data = null;
             console.log("获取用户详情失败!", error.response.data);
         });
         return data;
@@ -177,7 +186,7 @@ const musicServer = {
 
     /* 登录状态 */
     loginStatus: async function(){
-        let data;
+        let data = null;
         await axios({
             method: "get",
             url: this.baseUrl + "/login/status",
@@ -187,6 +196,7 @@ const musicServer = {
         }).then(function (resp) {
             data = resp.data.data;
         }).catch(function(error){
+            data = null;
             console.log("获取登录状态失败!", error.response.data);
         });
         return data;
@@ -220,6 +230,7 @@ const musicServer = {
                 };
             }
         }).catch(function(error){
+            song = null;
             console.log("歌曲搜索失败!", error.response.data);
         });
         return song;
@@ -244,6 +255,7 @@ const musicServer = {
                 url = resp.data.data[0].url;
             }
         }).catch(function(error){
+            url = null;
             console.log("歌曲链接获取失败!", error.message);
         });
         return url;
@@ -278,6 +290,7 @@ const musicServer = {
                 songList.push(song);
             }
         }).catch(function(error){
+            songList = null;
             console.log("歌单信息获取失败!", error.response.data);
         });
         return songList;
@@ -317,6 +330,7 @@ const qqmusicServer = {
                 };
             }
         }).catch(function(error){
+            song = null;
             musicMethod.pageAlert(error.message);
         });
         return song;
@@ -342,6 +356,7 @@ const qqmusicServer = {
                 musicMethod.pageAlert("链接获取失败");
             }
         }).catch(function(error){
+            url = null;
             musicMethod.pageAlert(error.message);
         });
         return url;
