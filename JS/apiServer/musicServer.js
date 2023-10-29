@@ -23,8 +23,7 @@ const musicServer = {
         }).then(function (resp) {
             data = resp.data;
         }).catch(function(error){
-            data = null;
-            console.log("验证码发送失败!", error.response.data);
+            console.log("验证码发送失败!", error.response);
         });        
         return data;
     },
@@ -45,8 +44,7 @@ const musicServer = {
         }).then(function (resp) {
             data = resp.data;
         }).catch(function(error){
-            data = null;
-            console.log("验证码校验失败!", error.response.data);
+            console.log("验证码校验失败!", error.response);
         });
         return data;
     },
@@ -67,15 +65,14 @@ const musicServer = {
         }).then(function (resp) {
             data = resp.data;
         }).catch(function(error){
-            data = null;
-            console.log("登录失败!", error.response.data);
+            console.log("登录失败!", error.response);
         });
         return data;
     },
     /*
         游客登录
      */
-    anyoneLogin: async function(){
+    anonimousLogin: async function(){
         let data = null;
         await axios({
             method: "get",
@@ -83,8 +80,7 @@ const musicServer = {
         }).then(function (resp) {
             data = resp.data;
         }).catch(function(error){
-            data = null;
-            console.log("游客登录失败！", error.response.data);
+            console.log("游客登录失败！", error.response);
         });
         return data;
     },
@@ -102,8 +98,7 @@ const musicServer = {
         }).then(function (resp) {
             unikey = resp.data.data.unikey;
         }).catch(function(error){
-            unikey = null;
-            console.log("获取二维码key失败!", error.response.data);
+            console.log("获取二维码key失败!", error.response);
         });
         return unikey;
     },
@@ -123,8 +118,7 @@ const musicServer = {
         }).then(function (resp) {
             qrImgUrl = resp.data.data.qrimg;
         }).catch(function(error){
-            qrImgUrl = null;
-            console.log("二维码图片获取失败!", error.response.data);
+            console.log("二维码图片获取失败!", error.response);
         });
         return qrImgUrl;
     },
@@ -143,8 +137,7 @@ const musicServer = {
         }).then(function (resp) {
             data = resp.data;
         }).catch(function(error){
-            data = null;
-            console.log("获取二维码扫描状态失败!", error.response.data);
+            console.log("获取二维码扫描状态失败!", error.response);
         });
         return data;
     },
@@ -159,8 +152,7 @@ const musicServer = {
                 cookie: config.cookie
             }
         }).catch(function(error){
-            data = null;
-            console.log("退出登录失败！", error.response.data);
+            console.log("退出登录失败！", error.response);
         });
         return data;
     },
@@ -178,8 +170,7 @@ const musicServer = {
             data = resp.data;
             console.log(resp.data);
         }).catch(function(error){
-            data = null;
-            console.log("获取用户详情失败!", error.response.data);
+            console.log("获取用户详情失败!", error.response);
         });
         return data;
     },
@@ -196,8 +187,7 @@ const musicServer = {
         }).then(function (resp) {
             data = resp.data.data;
         }).catch(function(error){
-            data = null;
-            console.log("获取登录状态失败!", error.response.data);
+            console.log("获取登录状态失败!", error.response);
         });
         return data;
     },
@@ -230,8 +220,7 @@ const musicServer = {
                 };
             }
         }).catch(function(error){
-            song = null;
-            console.log("歌曲搜索失败!", error.response.data);
+            console.log("歌曲搜索失败!", error.response);
         });
         return song;
     },
@@ -255,7 +244,6 @@ const musicServer = {
                 url = resp.data.data[0].url;
             }
         }).catch(function(error){
-            url = null;
             console.log("歌曲链接获取失败!", error.message);
         });
         return url;
@@ -290,8 +278,7 @@ const musicServer = {
                 songList.push(song);
             }
         }).catch(function(error){
-            songList = null;
-            console.log("歌单信息获取失败!", error.response.data);
+            console.log("歌单信息获取失败!", error.response);
         });
         return songList;
     },
@@ -330,7 +317,6 @@ const qqmusicServer = {
                 };
             }
         }).catch(function(error){
-            song = null;
             musicMethod.pageAlert(error.message);
         });
         return song;
@@ -356,7 +342,6 @@ const qqmusicServer = {
                 musicMethod.pageAlert("链接获取失败");
             }
         }).catch(function(error){
-            url = null;
             musicMethod.pageAlert(error.message);
         });
         return url;

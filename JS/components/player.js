@@ -15,6 +15,9 @@ export const player = {
 
     // 空闲歌单列表 
     freeList: [],
+    
+    // 播放错误的次数
+    playErrorCount: 0,
 
     // 空闲歌单列表的播放索引
     freeIndex: 0, 
@@ -156,10 +159,20 @@ export const player = {
             this.playNext();
         });
         // 5. 播放失败事件
-        this.audio.addEventListener("error", () => {  
-            // 播放下一首歌曲
-            this.playNext();
-            musicMethod.pageAlert("播放错误，播放下一首");
+        this.audio.addEventListener("error", () => {
+            // 若多首歌都播放失败，可能服务器问题，应当停止请求
+            if(this.playErrorCount++ > 10){
+                setInterval(function(){
+                    musicMethod.pageAlert("多次播放错误，请确认服务器状态!");
+                }, 7000);
+                return;
+            }
+            
+            musicMethod.pageAlert("播放错误，即将播放下一首 " + this.playErrorCount);
+            setTimeout(() => {
+                // 播放下一首歌曲
+                this.playNext();
+            }, 1000);           
         });
         musicMethod.pageAlert("已初始化播放器!");
     }

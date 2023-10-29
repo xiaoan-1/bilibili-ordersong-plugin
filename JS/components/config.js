@@ -37,7 +37,7 @@ export const config = {
     songBlackList: [],
 
     // 用户登录的cookie
-    cookie: null,
+    cookie: "",
 
     // 加载空闲歌单
     loadSongList: async function(listId){
@@ -213,7 +213,7 @@ export const config = {
         /* 一、初始化配置项 */
         // 1. 读取本地存储中的配置项
         for(const key in this){
-            if(typeof this[key] == "function" || !localStorage.getItem(key)){
+            if(!localStorage.getItem(key)){
                 continue;
             }
             if( typeof this[key] == "number"){
@@ -242,7 +242,14 @@ export const config = {
                 captcha.disabled = true;
                 captchaBtn.style.display = "none";
                 btnLogin.textContent = "退出登录";
+                document.getElementById('qrLogin').textContent = "退出登录";
+            }else{
+                musicMethod.pageAlert("登录已过期, 请重新登录!");
             }
+        }else{
+            musicMethod.pageAlert("用户未登录, 可能无法播放歌曲!");
+            // ------------待修改为游客登录--------
+            // this.cookie = musicServer.anonimous();
         }
         // 4. 加载用户黑名单到页面中
         let elem_userBlackList = document.getElementById('userBlackList');
@@ -370,7 +377,7 @@ export const config = {
         // 5. 网易二维码登录
         let qrCheck = null;
         document.getElementById('qrLogin').onclick = async (e) =>{
-            if(this.cookie == null){
+            if(this.cookie == ""){
                 // 二维码图片
                 let qrImg = document.getElementById('qrImg'); 
                 if(qrImg.style.display == "block"){
@@ -413,6 +420,7 @@ export const config = {
                         musicMethod.pageAlert("登录成功");
                         // 清除定时器
                         clearInterval(qrCheck);
+                        clearInterval(loginAlert);
                     }
                 }, 3000)
 
@@ -424,7 +432,7 @@ export const config = {
                 phone.value = "";
                 phoneNumber = null;
                 // 删除本地cookie
-                this.cookie = null;
+                this.cookie = "";
                 document.cookie = "";
                 localStorage.removeItem("cookie");
                 // 启用手机号验证码功能
@@ -434,9 +442,8 @@ export const config = {
         };
         // 6. QQ音乐设置cookie（仅临时设置）
         document.getElementById('qSetCookie').onclick = async (e) =>{
-            let cookie = document.getElementById('cookie')
-            qqmusicServer.setCookie(cookie.value);
-            cookie.value = "";
+            let qqcookie = document.getElementById('cookie')
+            qqmusicServer.setCookie(qqcookie.value);
         };
         // 7. 加载歌单
         document.getElementById('loadSongList').onclick = async (e) =>{
