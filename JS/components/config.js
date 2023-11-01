@@ -377,7 +377,7 @@ export const config = {
         // 5. 网易二维码登录
         let qrCheck = null;
         document.getElementById('qrLogin').onclick = async (e) =>{
-            if(this.cookie && this.cookie != ""){
+            if(!this.cookie || this.cookie == ""){
                 // 二维码图片
                 let qrImg = document.getElementById('qrImg'); 
                 if(qrImg.style.display == "block"){
