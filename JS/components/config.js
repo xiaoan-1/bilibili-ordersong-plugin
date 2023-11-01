@@ -37,7 +37,7 @@ export const config = {
     songBlackList: [],
 
     // 用户登录的cookie
-    cookie: "",
+    cookie: null,
 
     // 加载空闲歌单
     loadSongList: async function(listId){

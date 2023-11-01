@@ -55,10 +55,22 @@ export const player = {
         }
         // 检查歌曲链接
         if(!url){
-            musicMethod.pageAlert("歌曲链接被吃掉了>_<!");
+            
+            // 若多首歌链接都获取失败，可能服务器问题，应当停止请求
+            if(this.playErrorCount++ > 5){
+                setInterval(function(){
+                    musicMethod.pageAlert("多次播放错误，请确认服务器状态!");
+                }, 7000);
+                return;
+            }
+            musicMethod.pageAlert("歌曲链接被吃掉了>_<!" + this.playErrorCount);
+            setTimeout(() => {
+                // 播放下一首歌曲
+                this.playNext();
+            }, 7000);
             return;
         }
-        /* ??????????为什么 audio.src = null 会得出奇怪的结果???????? */
+        /* 可能浏览器插件会导致 audio.src = null 后src并不等于null */
         this.audio.src = url;
 
         /*----------------------------音量淡入-------------------------------*/
@@ -160,14 +172,6 @@ export const player = {
         });
         // 5. 播放失败事件
         this.audio.addEventListener("error", () => {
-            // 若多首歌都播放失败，可能服务器问题，应当停止请求
-            if(this.playErrorCount++ > 10){
-                setInterval(function(){
-                    musicMethod.pageAlert("多次播放错误，请确认服务器状态!");
-                }, 7000);
-                return;
-            }
-            
             musicMethod.pageAlert("播放错误，即将播放下一首 " + this.playErrorCount);
             setTimeout(() => {
                 // 播放下一首歌曲
