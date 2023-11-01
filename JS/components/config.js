@@ -361,7 +361,6 @@ export const config = {
                 musicServer.logout();
                 // 清空手机号
                 phone.value = "";
-                phoneNumber = null;
                 // 删除本地cookie
                 this.cookie = null;
                 localStorage.removeItem("cookie");
@@ -430,7 +429,6 @@ export const config = {
                 musicServer.logout();
                 // 清空手机号
                 phone.value = "";
-                phoneNumber = null;
                 // 删除本地cookie
                 this.cookie = "";
                 document.cookie = "";
