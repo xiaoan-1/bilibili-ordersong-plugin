@@ -224,13 +224,14 @@ export const config = {
                 this[key] = JSON.parse(localStorage.getItem(key));
             }
         }
+        console.log(this);
         // 2. 加载空闲歌单
         this.loadSongList(this.songListId);
         // 3. 获取用户登录状态
         let phone = document.getElementById('phone');
         let captcha = document.getElementById('captcha'); 
         let captchaBtn = document.getElementById('getCaptcha'); 
-        if(this.cookie){ 
+        if(this.cookie && this.cookie != ""){ 
             let btnLogin = document.getElementById('login');
             // 获取登录的用户信息
             let loginStatus = await musicServer.loginStatus();
@@ -376,7 +377,7 @@ export const config = {
         // 5. 网易二维码登录
         let qrCheck = null;
         document.getElementById('qrLogin').onclick = async (e) =>{
-            if(this.cookie == ""){
+            if(this.cookie && this.cookie != ""){
                 // 二维码图片
                 let qrImg = document.getElementById('qrImg'); 
                 if(qrImg.style.display == "block"){
@@ -434,7 +435,7 @@ export const config = {
                 document.cookie = "";
                 localStorage.removeItem("cookie");
                 // 启用手机号验证码功能
-                e.target.textContent = "登录";
+                e.target.textContent = "二维码登录";
                 musicMethod.pageAlert("已退出登录!");
             }  
         };
