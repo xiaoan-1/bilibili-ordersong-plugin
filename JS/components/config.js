@@ -224,13 +224,15 @@ export const config = {
                 this[key] = JSON.parse(localStorage.getItem(key));
             }
         }
-        console.log(this);
+
         // 2. 加载空闲歌单
         this.loadSongList(this.songListId);
         // 3. 获取用户登录状态
+        let loginAlert = null;
         let phone = document.getElementById('phone');
         let captcha = document.getElementById('captcha'); 
         let captchaBtn = document.getElementById('getCaptcha'); 
+
         if(this.cookie && this.cookie != ""){ 
             let btnLogin = document.getElementById('login');
             // 获取登录的用户信息
@@ -248,7 +250,9 @@ export const config = {
                 musicMethod.pageAlert("登录已过期, 请重新登录!");
             }
         }else{
+            
             musicMethod.pageAlert("用户未登录, 可能无法播放歌曲!");
+            
             // ------------待修改为游客登录--------
             // this.cookie = musicServer.anonimous();
         }
@@ -350,6 +354,7 @@ export const config = {
                         captcha.value = "";
                         captchaBtn.style.display = "none";
                         e.target.textContent = "退出登录";
+                        clearInterval(loginAlert);
                     }else{
                         musicMethod.pageAlert(verify.message);
                     }
