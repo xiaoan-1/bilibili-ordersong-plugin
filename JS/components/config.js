@@ -191,7 +191,7 @@ export const config = {
             this.pageAlert("已经点上啦!>_<!");
             return false;
         }
-        if(this.maxDuration && order.song.duration > this.maxDuration){
+        if(this.maxDuration > 0 && order.song.duration > this.maxDuration){
             // 该歌曲是否无歌曲限制，且歌曲时长超出规定,
             this.pageAlert("你点的歌时太长啦!>_<");
             return false

@@ -54,20 +54,19 @@ export const player = {
             url = await musicServer.getSongUrl(song.sid);
         }
         // 检查歌曲链接
-        if(!url){
-            
-            // 若多首歌链接都获取失败，可能服务器问题，应当停止请求
+        if(!url){            
+            // 若多首歌链接都获取失败，可能服务器问题，停止请求
             if(this.playErrorCount++ > 5){
                 setInterval(function(){
-                    musicMethod.pageAlert("多次播放错误，请确认服务器状态!");
+                    musicMethod.pageAlert("多次播放失败，请确认服务器状态!");
                 }, 7000);
                 return;
             }
-            musicMethod.pageAlert("歌曲链接被吃掉了>_<!" + this.playErrorCount);
+            musicMethod.pageAlert("歌曲链接被吃掉了(>_<) =>" + this.playErrorCount++);
             setTimeout(() => {
                 // 播放下一首歌曲
                 this.playNext();
-            }, 7000);
+            }, 3000);
             return;
         }
         /* 可能浏览器插件会导致 audio.src = null 后src并不等于null */
@@ -161,7 +160,7 @@ export const player = {
             // 页面进度条实时修改
             progress.style.width = ((this.audio.currentTime / this.audio.duration) * 280) + "px";
             // 超过歌曲限长则自动播放下一首
-            if (config.overLimit > 0) {
+            if (config.overLimit > 0 && this.audio.currentTime > config.overLimit) {
                 this.playNext();
             }
         });
@@ -172,11 +171,9 @@ export const player = {
         });
         // 5. 播放失败事件
         this.audio.addEventListener("error", () => {
-            musicMethod.pageAlert("播放错误，即将播放下一首 " + this.playErrorCount);
-            setTimeout(() => {
-                // 播放下一首歌曲
-                this.playNext();
-            }, 1000);           
+            musicMethod.pageAlert("播放错误，即将播放下一首 =>" + this.playErrorCount++);
+            // 播放下一首歌曲
+            this.playNext();         
         });
         musicMethod.pageAlert("已初始化播放器!");
     }
