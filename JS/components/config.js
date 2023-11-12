@@ -37,7 +37,7 @@ export const config = {
     songBlackList: [],
 
     // 用户登录的cookie
-    cookie: null,
+    cookie: "",
 
     // 加载空闲歌单
     loadSongList: async function(listId){
@@ -227,12 +227,14 @@ export const config = {
 
         // 2. 加载空闲歌单
         this.loadSongList(this.songListId);
-        // 3. 获取用户登录状态
+       
+        
         let loginAlert = null;
         let phone = document.getElementById('phone');
         let captcha = document.getElementById('captcha'); 
         let captchaBtn = document.getElementById('getCaptcha'); 
-
+        
+        // 3. 获取用户登录状态
         if(this.cookie && this.cookie != ""){ 
             let btnLogin = document.getElementById('login');
             // 获取登录的用户信息
@@ -245,9 +247,10 @@ export const config = {
                 captcha.disabled = true;
                 captchaBtn.style.display = "none";
                 btnLogin.textContent = "退出登录";
+                document.getElementById('qrInfo').value = "已登录";
                 document.getElementById('qrLogin').textContent = "退出登录";
             }else{
-                musicMethod.pageAlert("登录已过期, 请重新登录!");
+                musicMethod.pageAlert("登录失败!");
             }
         }else{
             
@@ -256,6 +259,7 @@ export const config = {
             // ------------待修改为游客登录--------
             // this.cookie = musicServer.anonimous();
         }
+
         // 4. 加载用户黑名单到页面中
         let elem_userBlackList = document.getElementById('userBlackList');
         for(let i = 0; i < this.userBlackList.length; i++){
@@ -299,7 +303,6 @@ export const config = {
             })
         }
         // 3. 获取验证码（已失效）
-        captchaBtn.disabled = true;
         captchaBtn.onclick = async function(e){
             // 校验手机号格式 
             var regExp = new RegExp("^1[356789]\\d{9}$");
@@ -332,7 +335,6 @@ export const config = {
             }
         }
         // 4. 手机号登录（已失效）
-        document.getElementById('login').disabled = true;
         document.getElementById('login').onclick = async (e) => {
             if(this.cookie == null){
                 // 如果当前不存在cookie，则进行登录获取cookie
@@ -422,6 +424,7 @@ export const config = {
                         // 登录成功后重新加载空闲歌单
                         this.loadSongList(this.songListId);
                         e.target.textContent = "退出登录";
+                        document.getElementById('qrInfo').value = "已登录";
                         musicMethod.pageAlert("登录成功");
                         // 清除定时器
                         clearInterval(qrCheck);
@@ -441,6 +444,7 @@ export const config = {
                 localStorage.removeItem("cookie");
                 // 启用手机号验证码功能
                 e.target.textContent = "二维码登录";
+                document.getElementById('qrInfo').value = "请扫码登录";
                 musicMethod.pageAlert("已退出登录!");
             }  
         };
