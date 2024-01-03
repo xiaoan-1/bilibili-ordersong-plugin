@@ -37,57 +37,62 @@
             <table>
                 <tbody>
                     <tr class="input">
-                        <td>手机号：</td>
+                        <td>手机号</td>
                         <td><input type="tel" id="phone" disabled="disabled" placeholder="请使用扫码登录"></td>
                         <td><button id="getCaptcha" disabled="disabled">获取验证码</button></td>
                     </tr>
                     <tr class="input">
-                        <td>验证码：</td>
+                        <td>验证码</td>
                         <td><input type="tel" id="captcha" disabled="disabled" placeholder=""></td>
                         <td><button id="login" disabled="disabled">登录</button></td>
                     </tr>
                     <tr class="input">
-                        <td>网易云：</td>
+                        <td>网易云</td>
                         <td><input type="text" id="qrInfo" disabled="disabled" placeholder="请扫码登录"></td>
                         <td><button id="qrLogin">二维码登录</button></td>
                     </tr>
                     <tr class="input">
-                        <td>QQ音乐：</td>
+                        <td>QQ音乐</td>
                         <td><input type="tel" id="cookie" placeholder="请输入cookie"></td>
                         <td><button id="qSetCookie">设置Cookie</button></td>
                     </tr>
                     <tr class="input">
-                        <td>管理员uid：</td>
+                        <td>管理员uid</td>
                         <td><input type="text" id="adminId"></td>
                     </tr>
                     <tr class="input">
-                        <td>用户点歌数：</td>
+                        <td>用户点歌数</td>
                         <td><input type="text" id="userOrder"></td>
                     </tr>
                     <tr class="input">
-                        <td>最大点歌数：</td>
+                        <td>最大点歌数</td>
                         <td><input type="text" id="maxOrder"></td>
                     </tr>
                     <tr class="input">
-                        <td>最大歌曲时长：</td>
+                        <td>最大歌曲时长</td>
                         <td><input type="text" id="maxDuration"></td>
                     </tr>
                     <tr class="input">
-                        <td>超时限播时长：</td>
+                        <td>超时限播时长</td>
                         <td><input type="text" id="overLimit"></td>
                     </tr>
                     <tr class="input">
-                        <td>空闲歌单ID：</td>
+                        <td>空闲歌单ID</td>
                         <td><input type="text" id="songListId"></td>
                         <td><button id="loadSongList">加载歌单</button></td>
                     </tr>
+                    <tr class="input">
+                        <td>历史空闲歌单</td>
+                        <td><select id="freeSongListHistory" size="4"></select></td>
+                        <td><button id="selectSongList">选择歌单</button></td>
+                    </tr>
                     <tr class="select">
-                        <td>历史点歌用户：</td>
+                        <td>历史点歌用户</td>
                         <td><select id="userHistory" size="4"></select></td>
                         <td><button id="addUserBlack">加入黑名单</button></td>
                     </tr>
                     <tr class="select">
-                        <td>用户黑名单：</td>
+                        <td>用户黑名单</td>
                         <td>
                             <select id="userBlackList" size="4">
                             </select>
@@ -95,12 +100,12 @@
                         <td><button id="delUserBlack">移除黑名单</button></td>
                     </tr>
                     <tr class="select">
-                        <td>历史点歌歌曲：</td>
+                        <td>历史点歌歌曲</td>
                         <td><select id="songHistory" size="4"></select></td>
                         <td><button id="addSongBlack">加入黑名单</button></td>
                     </tr>
                     <tr class="select">
-                        <td>歌曲黑名单：</td>
+                        <td>歌曲黑名单</td>
                         <td>
                             <select id="songBlackList" size="4">
                             </select>

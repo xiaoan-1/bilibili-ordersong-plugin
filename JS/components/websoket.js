@@ -172,7 +172,7 @@ export const webSocket = {
 
         // 设置鉴权包 
         let authInfo = {
-            'uid': 0,
+            'uid': 352905327,
             'roomid': parseInt(this.roomId, 10),
             'protover': 2,
             'platform': 'web',
@@ -324,9 +324,7 @@ export const webSocket = {
             if(player.orderList.length > 0 && player.orderList[0].uname == "空闲歌单"){
                 player.playNext();
             }
-        }
-        // 切歌
-        if (danmu == "切歌") { 
+        }else if (danmu == "切歌") { 
             // 切歌命令，触发切歌流程
             if(player.orderList[0].uid == userDanmu.uid || userDanmu.uid == config.adminId){
                 // 如果当前播放的是该用户的歌曲，或者发送命令的是管理员，则播放下一首歌曲

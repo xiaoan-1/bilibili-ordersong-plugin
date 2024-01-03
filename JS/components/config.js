@@ -20,10 +20,13 @@ export const config = {
 
     // 限制歌曲播放的时长(单位秒)，超过则自动播放下一首歌曲
     overLimit: 0,
-
+    
     // 空闲歌单ID (登录网易云网站，获取歌单页面url结尾ID)
     songListId: 7294328248, 
     
+    // 空闲歌单列表
+    freeSongList: [],
+
     // 历史点歌用户
     userHistory: [],
 
@@ -43,24 +46,50 @@ export const config = {
     loadSongList: async function(listId){
         if(!listId){
             musicMethod.pageAlert("歌单Id无效!");
+            return;
         }
         // 获取新的歌单
         let songList = await musicServer.getSongList(listId);
         if(!songList.length){
             musicMethod.pageAlert("歌单列表获取失败!");
+            return false;
         }
-        
         player.freeList = songList;
+        
+        document.getElementById('songListId').value = listId;
         // 获取歌单成功后保存配置项
         this.songListId = listId;
-        document.getElementById('songListId').value = listId;
         localStorage.setItem("songListId", this.songListId);
+        // 添加歌单到历史记录中
+        this.addSongListHistory(listId);
         // 加载完成后自动播放下一首
         player.playNext();
         musicMethod.pageAlert("已获取空闲歌单列表!");
-        
     },
 
+    // 添加歌单ID到历史歌单列表
+    addSongListHistory: function(listId){
+        // 查重
+        if(this.freeSongList.indexOf(listId) != -1){
+            return;
+        }
+        // 限长，按队列结构出队（防止无限占用内存）
+        if(this.userHistory.length > 50){
+            this.userHistory.shift();
+        }
+        
+        this.freeSongList.push(listId);
+        // 同步页面的历史用户下拉框
+        let elem_freeSongListHistory = document.getElementById('freeSongListHistory');
+        let elem_option = document.createElement('option');
+        elem_option.value = listId;
+        elem_option.textContent = listId;
+        elem_freeSongListHistory.appendChild(elem_option);
+
+        // 保存配置信息
+        localStorage.setItem("freeSongList", JSON.stringify(this.freeSongList));
+
+    },
     // 添加历史点歌用户
     addUserHistory: function(user){
         // 查重
@@ -225,16 +254,12 @@ export const config = {
             }
         }
 
-        // 2. 加载空闲歌单
-        this.loadSongList(this.songListId);
-       
-        
         let loginAlert = null;
         let phone = document.getElementById('phone');
         let captcha = document.getElementById('captcha'); 
         let captchaBtn = document.getElementById('getCaptcha'); 
         
-        // 3. 获取用户登录状态
+        // 2. 获取用户登录状态
         if(this.cookie && this.cookie != ""){ 
             let btnLogin = document.getElementById('login');
             // 获取登录的用户信息
@@ -260,7 +285,16 @@ export const config = {
             // this.cookie = musicServer.anonimous();
         }
 
-        // 4. 加载用户黑名单到页面中
+        // 3. 加载歌单列表到设置页面中
+        let elem_freeSongList = document.getElementById('freeSongListHistory');
+        for(let i = 0; i < this.freeSongList.length; i++){
+            let option = document.createElement('option');
+            option.value = this.freeSongList[i];
+            option.textContent = this.freeSongList[i];
+            elem_freeSongList.appendChild(option);
+        }
+        
+        // 4. 加载用户黑名单到设置页面中
         let elem_userBlackList = document.getElementById('userBlackList');
         for(let i = 0; i < this.userBlackList.length; i++){
             let option = document.createElement('option');
@@ -268,7 +302,7 @@ export const config = {
             option.textContent = this.userBlackList[i].uname;
             elem_userBlackList.appendChild(option);
         }
-        // 5. 加载歌曲黑名单到页面中
+        // 5. 加载歌曲黑名单到设置页面中
         let elem_songBlackList = document.getElementById('songBlackList');
         for(let i = 0; i < this.songBlackList.length; i++){
             let option = document.createElement('option');
@@ -276,6 +310,9 @@ export const config = {
             option.textContent = this.songBlackList[i].sname;
             elem_songBlackList.appendChild(option);
         }
+
+        // 6. 加载空闲歌单
+        this.loadSongList(this.songListId);
 
 
         /* 二、初始化设置界面操作 */
@@ -463,7 +500,15 @@ export const config = {
             }
             this.loadSongList(listId);
         };
-        // 8. 添加用户到黑名单
+        // 8. 选择歌单
+        document.getElementById('selectSongList').onclick = () =>{
+            let elem_userHistory = document.getElementById('freeSongListHistory');
+            let elem_songListId = document.getElementById('songListId');
+            if(elem_userHistory.children.length > 0){
+                elem_songListId.value = this.freeSongList[elem_userHistory.selectedIndex];
+            }
+        }
+        // 9. 添加用户到黑名单
         document.getElementById('addUserBlack').onclick = () =>{
             let elem_userHistory = document.getElementById('userHistory');
             if(elem_userHistory.children.length > 0){
@@ -472,7 +517,7 @@ export const config = {
                 musicMethod.pageAlert("历史用户为空!");
             }
         };
-        // 9. 添加歌曲到黑名单
+        // 10. 添加歌曲到黑名单
         document.getElementById('addSongBlack').onclick = () =>{
             let elem_songHistory = document.getElementById('songHistory');
             if(elem_songHistory.children.length > 0){
@@ -481,7 +526,7 @@ export const config = {
                 musicMethod.pageAlert("历史歌曲为空");
             }
         };
-        // 10. 移除黑名单的用户
+        // 11. 移除黑名单的用户
         document.getElementById('delUserBlack').onclick = () =>{
             if(elem_userBlackList.selectedIndex > -1){
                 // 移除配置项中用户黑名单的对应用户
@@ -495,7 +540,7 @@ export const config = {
             }
             
         };
-        // 11. 移除黑名单的歌曲
+        // 12. 移除黑名单的歌曲
         document.getElementById('delSongBlack').onclick = () =>{
             if(elem_songBlackList.selectedIndex > -1){
                 // 移除配置项中歌曲黑名单对应的歌曲

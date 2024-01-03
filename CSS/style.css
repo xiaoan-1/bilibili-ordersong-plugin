@@ -169,12 +169,14 @@ body, html{
 
 /* 配置页面样式 */
 .config{
-    width: 500px;
+    width: 520px;
     height: 0px;
     font-size: 21px;
     border-radius: 10px;
     overflow: auto;
     background: rgb(114, 114, 114);
+    
+
     position: absolute;
     top: 20px;
     left: 50%;
@@ -188,14 +190,14 @@ body, html{
     width: 500px;
 }
 
-.config tr td{
-    width: 150px;
-}
 .config tr td:nth-child(1){
+    width: 150px;
     font-weight: 500;
-    text-align: right;
+    text-align: justify;
+    text-align-last: justify;
 }
 .config tr td:nth-child(2){
+    width: 200px;
     text-align: center;
     position: relative;
 }
@@ -208,7 +210,7 @@ body, html{
 
 .config tr td input{
     /* outline: none; */
-    width: 120px; 
+    width: 140px; 
     padding: 3px;
     outline: none;
     border: 1px white solid;
@@ -225,28 +227,32 @@ body, html{
     box-shadow: 0px 0px 10px white;
     background: white;
 }
-
+/* 所有选择框 */
 .config tr td select{
-    /* outline: none; */
+    outline: none;
     width: 100%;
     height: 100px;
+    text-align: center;
     font-size: large;
     color: white;
     outline: none;
+    overflow: auto;
     background: rgb(187, 187, 187);
     border-radius: 3px;
     transition: .5s;
 }
-
+.config tr td select option:checked{
+    box-shadow: 0px 0px 10px black;
+}
+.config tr td select:hover{
+    box-shadow: 0px 0px 20px black;
+}
+/* 黑名单框，覆盖全局选择框样式 */
 #userBlackList, #songBlackList{
     font-weight: bolder;
     border: 3px #000000 solid;
     background: rgb(16, 20, 16);
     transition: .5s;
-}
-
-.config tr td select:hover{
-    box-shadow: 0px 0px 20px black;
 }
 
 .config tr td button{
