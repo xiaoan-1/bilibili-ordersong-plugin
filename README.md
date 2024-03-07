@@ -18,7 +18,7 @@ http://plugin.changsheng.space/plugin?roomid=你的直播间ID
 例如：http://plugin.changsheng.space/plugin?roomid=你的直播间ID&uid=123456&buvid=ABCD&key=ABCD
 
 获取方式：在B站网页端进入自己的直播页面，按F12调出控制台，如下图
-![提示1](https://github.com/xiaoan-1/bilibili-ordersong-plugin/blob/main/img/help.jpg)
+![提示1](https://github.com/xiaoan-1/bilibili-ordersong-plugin/blob/main/img/help.png)
 
 ## 设置简介
 1. 网易二维码登录：点击对应登录即可弹出二维码，扫码即可
@@ -32,15 +32,15 @@ http://plugin.changsheng.space/plugin?roomid=你的直播间ID
 9. 历史歌单列表、历史点歌用户、历史点歌歌曲、黑名单，字面意思
 
 ## 点歌面板
-![点歌界面](https://github.com/xiaoan-1/bilibili-ordersong-plugin/blob/main/img/panel.jpg)
+![点歌界面](https://github.com/xiaoan-1/bilibili-ordersong-plugin/blob/main/img/panel.png)
 
 ## 设置面板
-![设置面板1](https://github.com/xiaoan-1/bilibili-ordersong-plugin/blob/main/img/set1.jpg)
-![设置面板1](https://github.com/xiaoan-1/bilibili-ordersong-plugin/blob/main/img/set2.jpg)
+![设置面板1](https://github.com/xiaoan-1/bilibili-ordersong-plugin/blob/main/img/set1.png)
+![设置面板1](https://github.com/xiaoan-1/bilibili-ordersong-plugin/blob/main/img/set2.png)
 
 ## 提示信息
-![提示1](https://github.com/xiaoan-1/bilibili-ordersong-plugin/blob/main/img/tip1.jpg)
-![提示2](https://github.com/xiaoan-1/bilibili-ordersong-plugin/blob/main/img/tip2.jpg)
+![提示1](https://github.com/xiaoan-1/bilibili-ordersong-plugin/blob/main/img/tip1.png)
+![提示2](https://github.com/xiaoan-1/bilibili-ordersong-plugin/blob/main/img/tip2.png)
 
 
 ## 致谢
