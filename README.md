@@ -12,6 +12,7 @@ b站直播姬点歌H5插件
 在直播姬或者obs中选择添加浏览器插件,输入网址链接即可
 
 个人公益链接（若无法使用请自行搭建对应API服务）
+
 http://plugin.changsheng.space/plugin?roomid=你的直播间ID
 
 若发现用户名被***屏蔽，请获取自己的uid、buvid、key三个参数添加到链接后面，用&符号分隔
