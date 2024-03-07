@@ -15,9 +15,11 @@ b站直播姬点歌H5插件
 http://plugin.changsheng.space/plugin?roomid=你的直播间ID
 
 若发现用户名被***屏蔽，请获取自己的uid、buvid、key三个参数添加到链接后面，用&符号分隔
+
 例如：http://plugin.changsheng.space/plugin?roomid=你的直播间ID&uid=123456&buvid=ABCD&key=ABCD
 
 获取方式：在B站网页端进入自己的直播页面，按F12调出控制台，如下图
+
 ![提示1](https://github.com/xiaoan-1/bilibili-ordersong-plugin/blob/main/img/help.png)
 
 ## 设置简介
@@ -36,13 +38,16 @@ http://plugin.changsheng.space/plugin?roomid=你的直播间ID
 
 ## 设置面板
 ![设置面板1](https://github.com/xiaoan-1/bilibili-ordersong-plugin/blob/main/img/set1.png)
+
 ![设置面板1](https://github.com/xiaoan-1/bilibili-ordersong-plugin/blob/main/img/set2.png)
 
 ## 提示信息
 ![提示1](https://github.com/xiaoan-1/bilibili-ordersong-plugin/blob/main/img/tip1.png)
+
 ![提示2](https://github.com/xiaoan-1/bilibili-ordersong-plugin/blob/main/img/tip2.png)
 
 
 ## 致谢
 ~~本插件用到的网易音乐API来源于Binaryify的[网易云音乐 Node.js API service](https://github.com/Binaryify/NeteaseCloudMusicApi)~~
+
 本插件用到的QQ音乐API来源于jsososo的[QQMusicApi](https://github.com/jsososo/QQMusicApi)
