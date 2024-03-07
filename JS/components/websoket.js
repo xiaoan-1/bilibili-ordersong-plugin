@@ -12,6 +12,11 @@ export const webSocket = {
     
     // 直播间ID
     roomId: 0,
+    
+    // websocket鉴权信息
+    uid: null,
+    buvid: null,
+    key: null,
 
     // 发送心跳包的定时器
     timer: null,
@@ -152,13 +157,19 @@ export const webSocket = {
         // 设置连接url
         this.url = "wss://broadcastlv.chat.bilibili.com:2245/sub";
 
-        // 获取URL中的房间id参数
+        // 获取URL中的房间id参数和鉴权参数
         let URLParam = window.location.search.substring(1).split('&');
         URLParam.forEach(str => {
             let param = str.split('=');
             if(param.length == 2 && param[0].toLocaleUpperCase() == "ROOMID"){
                 this.roomId = parseInt(param[1]);
                 musicMethod.pageAlert("已获取直播间ID:" + this.roomId);
+            }else if (param.length == 2 && param[0].toLocaleUpperCase() == "UID") {
+                this.uid = param[1];
+            }else if (param.length == 2 && param[0].toLocaleUpperCase() == "BUVID") {
+                this.buvid = param[1];
+            }else if (param.length == 2 && param[0].toLocaleUpperCase() == "KEY") {
+                this.key = param[1];
             }
         });
 
@@ -171,14 +182,28 @@ export const webSocket = {
         }
 
         // 设置鉴权包 
-        let authInfo = {
-            'uid': 352905327,
-            'roomid': parseInt(this.roomId, 10),
-            'protover': 2,
-            'platform': 'web',
-            'clientver': '1.8.5',
-            'type': 2,
+        let authInfo;
+        if(this.uid && this.buvid && this.key){
+            authInfo = {
+                "uid": this.uid,
+                "roomid": parseInt(this.roomId, 10),
+                "protover": 2,
+                "buvid":this.buvid,
+                "platform": 'web',
+                "type": 2,
+                "key": this.key
+            }
+        }else{
+            authInfo = {
+                'uid': config.adminId,
+                'roomid': parseInt(this.roomId, 10),
+                'protover': 2,
+                'platform': 'danmuji',
+                'clientver': '1.8.5',
+                'type': 2,
+            }
         }
+        
         this.authPacket = this.createPacket(JSON.stringify(authInfo), 1, 7, 1)
         
         // 设置心跳包 
