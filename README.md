@@ -5,14 +5,20 @@ b站直播姬点歌H5插件
 ## 观众指令
 1. 点歌 + (平台) + 歌曲关键词，不带平台默认为网易云音乐（目前仅支持网易和QQ）
    - 开头两个字为“点歌”即可，无其他格式要求（例如：点歌起风了、点歌qq起风了）
-2. ~~切歌~~（野链接好像无法获取到用户ID，导致权限功能失效）
-   - ~~观众可以切换当前自己所点且正在播放的歌曲，无权限切其他人的歌曲~~
-   - ~~管理员可以切换任何人的歌曲~~
+2. 切歌
+   - 观众可以切换当前自己所点且正在播放的歌曲，无权限切其他人的歌曲
+   - 管理员可以切换任何人的歌曲
 ## 使用简介
-个人公益链接（若无法使用请自行搭建对应API服务） 
+在直播姬或者obs中选择添加浏览器插件,输入网址链接即可
+
+个人公益链接（若无法使用请自行搭建对应API服务）
 http://plugin.changsheng.space/plugin?roomid=你的直播间ID
 
-直播姬和obs选择添加浏览器插件
+若发现用户名被***屏蔽，请获取自己的uid、buvid、key三个参数添加到链接后面，用&符号分隔
+例如：http://plugin.changsheng.space/plugin?roomid=你的直播间ID&uid=123456&buvid=ABCD&key=ABCD
+
+获取方式：在B站网页端进入自己的直播页面，按F12调出控制台，如下图
+![提示1](https://github.com/xiaoan-1/bilibili-ordersong-plugin/blob/main/img/help.jpg)
 
 ## 设置简介
 1. 网易二维码登录：点击对应登录即可弹出二维码，扫码即可
@@ -26,21 +32,17 @@ http://plugin.changsheng.space/plugin?roomid=你的直播间ID
 9. 历史歌单列表、历史点歌用户、历史点歌歌曲、黑名单，字面意思
 
 ## 点歌面板
-![点歌界面](http://plugin.changsheng.space/images/panel.jpg)
+![点歌界面](https://github.com/xiaoan-1/bilibili-ordersong-plugin/blob/main/img/panel.jpg)
 
 ## 设置面板
-![设置面板1](http://plugin.changsheng.space/images/set1.jpg)
-![设置面板1](http://plugin.changsheng.space/images/set2.jpg)
-
+![设置面板1](https://github.com/xiaoan-1/bilibili-ordersong-plugin/blob/main/img/set1.jpg)
+![设置面板1](https://github.com/xiaoan-1/bilibili-ordersong-plugin/blob/main/img/set2.jpg)
 
 ## 提示信息
-![提示1](http://plugin.changsheng.space/images/tip1.jpg)
-![提示2](http://plugin.changsheng.space/images/tip2.jpg)
-
-
+![提示1](https://github.com/xiaoan-1/bilibili-ordersong-plugin/blob/main/img/tip1.jpg)
+![提示2](https://github.com/xiaoan-1/bilibili-ordersong-plugin/blob/main/img/tip2.jpg)
 
 
 ## 致谢
-本插件用到的网易音乐API来源于Binaryify的[网易云音乐 Node.js API service](https://github.com/Binaryify/NeteaseCloudMusicApi)
-
+~~本插件用到的网易音乐API来源于Binaryify的[网易云音乐 Node.js API service](https://github.com/Binaryify/NeteaseCloudMusicApi)~~
 本插件用到的QQ音乐API来源于jsososo的[QQMusicApi](https://github.com/jsososo/QQMusicApi)
