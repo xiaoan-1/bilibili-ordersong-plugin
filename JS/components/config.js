@@ -192,37 +192,37 @@ export const config = {
         // 查询用户是否被拉入黑名单
         for (let i = 0; i < this.userBlackList.length; i++) {
             if(this.userBlackList[i].uid == order.uid){
-                this.pageAlert("你已被加入暗杀名单!(▼へ▼メ)!");
+                musicMethod.pageAlert("你已被加入暗杀名单!(▼へ▼メ)!");
                 return false;
             }
         }
         // 用户点歌数是否已达上限
         if(player.orderList.filter(value => value.uid == order.uid).length >= this.userOrder){
-            this.pageAlert("你点太多啦，歇歇吧>_<!");
+            musicMethod.pageAlert("你点太多啦，歇歇吧>_<!");
             return false;
         }
         // 最大点歌数是否已达上限
         if(player.orderList.length >= this.maxOrder){
-            this.pageAlert("我装不下更多的歌啦>_<!");
+            musicMethod.pageAlert("我装不下更多的歌啦>_<!");
             return false;
         }
         
         // 查询歌曲是否被拉入黑名单
         for (let i = 0; i < this.songBlackList.length; i++) {
             if(this.songBlackList[i].sid == order.song.sid){
-                this.pageAlert("请不要乱点奇怪的歌!(▼ヘ▼#)");
+                musicMethod.pageAlert("请不要乱点奇怪的歌!(▼ヘ▼#)");
                 return false;
             }
         }     
         
         // 判断该歌曲是否已在点歌列表
         if(player.orderList.some(value => value.song.sid == order.song.sid)){
-            this.pageAlert("已经点上啦!>_<!");
+            musicMethod.pageAlert("已经点上啦!>_<!");
             return false;
         }
         if(this.maxDuration > 0 && order.song.duration > this.maxDuration){
             // 该歌曲是否无歌曲限制，且歌曲时长超出规定,
-            this.pageAlert("你点的歌时太长啦!>_<");
+            musicMethod.pageAlert("你点的歌时太长啦!>_<");
             return false
         }
         // 点歌成功，加入历史用户和历史歌曲列表中
