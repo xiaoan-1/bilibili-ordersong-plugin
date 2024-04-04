@@ -2,7 +2,7 @@ import { musicMethod } from "../public/method.js";
 
 export const biliServer = {
 
-    baseUrl: "http://127.0.0.1:9999",
+    baseUrl: "http://plugin.changsheng.space:3100",
     
     /* 项目启动APi
         @param code [主播身份码]
