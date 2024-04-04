@@ -2,6 +2,7 @@ import { config } from "./config.js";
 import { player } from "./player.js";
 import { musicMethod } from "../public/method.js";
 import { musicServer, qqmusicServer } from "../apiServer/musicServer.js";
+import { biliServer } from "../apiServer/biliServer.js";
 /* webSocket对象 */
 export const webSocket = {
     // socket连接地址
@@ -13,12 +14,13 @@ export const webSocket = {
     // 直播间ID
     roomId: 0,
     
-    // websocket鉴权信息
-    uid: null,
-    buvid: null,
-    key: null,
+    // 游戏场次Id
+    gameId: 0,
+    
+    // 主播身份码
+    anchorCode: "",
 
-    // 发送心跳包的定时器
+    // ws心跳和项目心跳的定时器
     timer: null,
 
     // 鉴权包
@@ -32,6 +34,148 @@ export const webSocket = {
 
     // 重连次数
     reconnect: 3,
+
+    // 初始化websocket链接
+    init: async function(){
+
+        // 获取URL中的身份码参数
+        let URLParam = window.location.search.substring(1).split('&');
+        URLParam.forEach(str => {
+            let param = str.split('=');
+            console.log(param);
+            if(param.length == 2 && param[0].toLocaleUpperCase() == "CODE"){
+                this.anchorCode = param[1];
+            }
+        });
+
+        if(this.anchorCode == ""){
+            musicMethod.pageAlertRepeat("无身份码，请检查url参数...");
+            return;
+        }
+
+        // 检查浏览器是否支持webSocket 
+        if (typeof (WebSocket) == "undefined") {
+            musicMethod.pageAlertRepeat("您的浏览器不支持WebSocket！");
+            return;
+        }
+
+        // 项目启动获取连接信息
+        let gameInfo = await biliServer.gameStart(this.anchorCode, 1711708120386);
+
+        if(!gameInfo){
+            musicMethod.pageAlertRepeat("弹幕连接信息获取失败！");
+            return;
+        }
+        
+
+        // 获取连接信息
+        this.url = gameInfo.websocket_info.wss_link[2];
+        this.roomId = gameInfo.anchor_info.room_id;
+        this.gameId = gameInfo.game_info.game_id;
+
+        // 设置鉴权包
+        this.authPacket = this.createPacket(gameInfo.websocket_info.auth_body, 1, 7, 1);;
+        // 设置心跳包 
+        this.heartPacket = this.createPacket("[object Object]", 1, 2, 1);
+
+        // 初始化完毕，打开弹幕连接
+        this.open();
+    },
+
+    // 打开websocket连接 
+    open: function(){
+        // 检查是否已存在socket连接
+       if(this.socket != null){
+           this.socket.close();
+           clearInterval(this.timer);
+       }
+       // 建立新的socket连接
+       try {
+           this.socket = new WebSocket(this.url);
+       } catch (error) {
+           return false;
+       }
+
+       // 1. 连接打开事件
+       this.socket.onopen = ()=> {
+           
+           // 发送心跳包和鉴权包 
+           this.socket.send(this.authPacket);
+           this.socket.send(this.heartPacket);
+
+           //发送心跳包 每30s发送一次
+           this.timer = setInterval(async () => {
+               console.log("心跳包");
+               this.socket.send(this.heartPacket);
+               await biliServer.gameHeartbeat(this.gameId);
+           }, 20000);
+
+           musicMethod.pageAlert("弹幕服务器连接已打开");
+       };
+
+       // 2. 获得消息事件
+       this.socket.onmessage = (msg) => {
+           // 接收弹幕消息，开始处理前端触发逻辑
+           var reader = new FileReader();
+
+           //读取blob对象（二进制流）为arraybuffer（二进制数组）
+           reader.readAsArrayBuffer(msg.data);
+
+           // 读取完毕后， 处理服务端数据
+           reader.onload = ()=> {
+               this.handlePacket(reader.result); 
+           };
+       };
+
+       // 3. 连接关闭事件
+       this.socket.onclose = () => {
+           // 停止发送心跳包
+           clearInterval(this.timer);
+           if(this.flag){
+               return;
+           }
+           // 开始重连
+           this.flag = true;
+           if( this.reconnect )
+           {
+               
+               this.reconnect--;
+               musicMethod.pageAlert("连接已关闭，正在重连..." + this.reconnect );
+               
+               setTimeout(() =>{
+                   this.open();
+               }, 3000)
+               
+           }else{
+                musicMethod.pageAlertRepeat("重连失败~请确认服务器状态");
+           }
+           this.flag = false;
+       };
+
+       // 4. 连接错误事件
+       this.socket.onerror = () => {
+           // 停止发送心跳包
+           clearInterval(this.timer);
+           if(this.flag){
+               return;
+           }
+           // 开始重连
+           this.flag = true;
+           if( this.reconnect )
+           {
+               musicMethod.pageAlert("连接错误，正在重连..." + this.reconnect );
+               this.reconnect--;
+               this.open();
+           }
+           else
+           {
+               setInterval(function(){
+                   musicMethod.pageAlert("重连失败! 连接已关闭!");
+               }, 7000);
+           }
+           this.flag = false;
+       }
+   },
 
     // 处理不用解压的arraybuffer数据包
     handlePacket: function (Packet) {
@@ -69,12 +213,12 @@ export const webSocket = {
                 // 消息体body格式转换  (bit->Byte->string->json)
                 const jsonDanmu = JSON.parse(this.uintArrayToString(new Uint8Array(body)));
                 // 提取弹幕消息
-                if(jsonDanmu.cmd == "DANMU_MSG"){
+                if(jsonDanmu.cmd == "LIVE_OPEN_PLATFORM_DM"){
                     console.log(jsonDanmu);
                     this.identifyDanmuCommand({
-                        uid: jsonDanmu.info[2][0],
-                        uname: jsonDanmu.info[2][1],
-                        danmu: jsonDanmu.info[1],
+                        uid: jsonDanmu.data.open_id,
+                        uname: jsonDanmu.data.uname,
+                        danmu: jsonDanmu.data.msg,
                     });
                 }
             }else{
@@ -146,169 +290,8 @@ export const webSocket = {
         return buffer;
     },
 
-    // 初始化websocket链接
-    init: function(){
-        // 检查浏览器是否支持webSocket 
-        if (typeof (WebSocket) == "undefined") {
-            musicMethod.pageAlert("您的浏览器不支持WebSocket！");
-            return false;
-        } 
-
-        // 设置连接url
-        this.url = "wss://broadcastlv.chat.bilibili.com:2245/sub";
-
-        // 获取URL中的房间id参数和鉴权参数
-        let URLParam = window.location.search.substring(1).split('&');
-        URLParam.forEach(str => {
-            let param = str.split('=');
-            if(param.length == 2 && param[0].toLocaleUpperCase() == "ROOMID"){
-                this.roomId = parseInt(param[1]);
-                musicMethod.pageAlert("已获取直播间ID:" + this.roomId);
-            }else if (param.length == 2 && param[0].toLocaleUpperCase() == "UID") {
-                this.uid = param[1];
-            }else if (param.length == 2 && param[0].toLocaleUpperCase() == "BUVID") {
-                this.buvid = param[1];
-            }else if (param.length == 2 && param[0].toLocaleUpperCase() == "KEY") {
-                this.key = param[1];
-            }
-        });
-
-        // 检查直播间Id
-        if(!this.roomId){
-            setInterval(function(){
-                musicMethod.pageAlert("未获取到直播间ID,请检查URL");
-            },7000);
-            return false;
-        }
-
-        // 设置鉴权包 
-        let authInfo;
-        if(this.uid && this.buvid && this.key){
-            authInfo = {
-                "uid": this.uid,
-                "roomid": parseInt(this.roomId, 10),
-                "protover": 2,
-                "buvid":this.buvid,
-                "platform": 'web',
-                "type": 2,
-                "key": this.key
-            }
-        }else{
-            authInfo = {
-                'uid': config.adminId,
-                'roomid': parseInt(this.roomId, 10),
-                'protover': 2,
-                'platform': 'danmuji',
-                'clientver': '1.8.5',
-                'type': 2,
-            }
-        }
-        
-        this.authPacket = this.createPacket(JSON.stringify(authInfo), 1, 7, 1)
-        
-        // 设置心跳包 
-        let heartInfo = "[object Object]"
-        this.heartPacket = this.createPacket(heartInfo, 1, 2, 1);
-
-        musicMethod.pageAlert("已初始化webSocket连接!");
-        return true;
-    },
-    // 打开websocket连接 
-    open: function(){
-         // 检查是否已存在socket连接
-        if(this.socket != null){
-            this.socket.close();
-            clearInterval(this.timer);
-        }
-        // 建立新的socket连接
-        try {
-            this.socket = new WebSocket(this.url);
-        } catch (error) {
-            return false;
-        }
-
-        // 1. 连接打开事件
-        this.socket.onopen = ()=> {
-            
-            // 发送心跳包和鉴权包 
-            this.socket.send(this.authPacket);
-            this.socket.send(this.heartPacket);
-
-            //发送心跳包 每30s发送一次
-            this.timer = setInterval(() => {
-                console.log("心跳包");
-                this.socket.send(this.heartPacket);
-            }, 30000);
-
-            // 连接成功，重置重连次数
-            this.reconnect = 3;
-
-            musicMethod.pageAlert("弹幕服务器连接已打开");
-        };
-
-        // 2. 获得消息事件
-        this.socket.onmessage = (msg) => {
-            // 接收弹幕消息，开始处理前端触发逻辑
-            var reader = new FileReader();
-
-            //读取blob对象（二进制流）为arraybuffer（二进制数组）
-            reader.readAsArrayBuffer(msg.data);
-
-            // 读取完毕后， 处理服务端数据
-            reader.onload = ()=> {
-                this.handlePacket(reader.result); 
-            };
-        };
-
-        // 3. 连接关闭事件
-        this.socket.onclose = () => {
-            // 停止发送心跳包
-            clearInterval(this.timer);
-            if(this.flag){
-                return;
-            }
-            // 开始重连
-            this.flag = true;
-            if( this.reconnect )
-            {
-                musicMethod.pageAlert("连接已关闭，正在重连..." + this.reconnect );
-                this.reconnect--;
-                this.open();
-            }
-            else
-            {
-                setInterval(function(){
-                    musicMethod.pageAlert("重连失败! 连接已关闭!");
-                }, 7000);
-            }
-            this.flag = false;
-            
-        };
-
-        // 4. 连接错误事件
-        this.socket.onerror = () => {
-            // 停止发送心跳包
-            clearInterval(this.timer);
-            if(this.flag){
-                return;
-            }
-            // 开始重连
-            this.flag = true;
-            if( this.reconnect )
-            {
-                musicMethod.pageAlert("连接错误，正在重连..." + this.reconnect );
-                this.reconnect--;
-                this.open();
-            }
-            else
-            {
-                setInterval(function(){
-                    musicMethod.pageAlert("重连失败! 连接已关闭!");
-                }, 7000);
-            }
-            this.flag = false;
-        }
-    },
+    
+    
 
     /*  识别弹幕命令
         @param: userDanmu 包括用户id、用户名、用户弹幕
@@ -316,8 +299,7 @@ export const webSocket = {
     identifyDanmuCommand: async function(userDanmu){
         let danmu = userDanmu.danmu.trim();
 
-        // 点歌命令触发
-        let order = null;
+        // 点歌命令触发        
         if (danmu.slice(0, 2) == "点歌") {
             // 获取点歌关键词
             let keyword = danmu.slice(2).trim();
@@ -333,7 +315,7 @@ export const webSocket = {
                 return;
             }
             // 封装点歌信息
-            order = {
+            let order = {
                 uid: userDanmu.uid,
                 uname: userDanmu.uname,
                 song: song
@@ -356,6 +338,20 @@ export const webSocket = {
                 player.playNext();
             }else{
                 musicMethod.pageAlert("不能切别人点的歌哦(^o^)");
+            }
+        }else if (danmu == "暂停") { 
+            // 切歌命令，触发切歌流程
+            if(player.orderList[0].uid == userDanmu.uid || userDanmu.uid == config.adminId){
+                player.audio.pause();
+            }else{
+                musicMethod.pageAlert("您没有权限进行该操作~");
+            }
+        }else if (danmu == "播放") { 
+            // 切歌命令，触发切歌流程
+            if(player.orderList[0].uid == userDanmu.uid || userDanmu.uid == config.adminId){
+                player.audio.play();
+            }else{
+                musicMethod.pageAlert("您没有权限进行该操作~");
             }
         }
     }

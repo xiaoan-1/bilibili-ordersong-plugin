@@ -5,23 +5,18 @@ b站直播姬点歌H5插件
 ## 观众指令
 1. 点歌 + (平台) + 歌曲关键词，不带平台默认为网易云音乐（目前仅支持网易和QQ）
    - 开头两个字为“点歌”即可，无其他格式要求（例如：点歌起风了、点歌qq起风了）
-2. 切歌
-   - 观众可以切换当前自己所点且正在播放的歌曲，无权限切其他人的歌曲
+2. 切歌/暂停/播放
+   - 观众可以切换、暂停、播放当前自己所点的歌曲，无权限操作其他人的歌曲
    - 管理员可以切换任何人的歌曲
+
 ## 使用简介
 在直播姬或者obs中选择添加浏览器插件,输入网址链接即可
 
 个人公益链接（若无法使用请自行搭建对应API服务）
 
-http://plugin.changsheng.space/plugin?roomid=你的直播间ID
+http://plugin.changsheng.space/plugin?roomid=您的直播身份码
 
-若发现用户名被***屏蔽，请获取自己的uid、buvid、key三个参数添加到链接后面，用&符号分隔
-
-例如：http://plugin.changsheng.space/plugin?roomid=你的直播间ID&uid=123456&buvid=ABCD&key=ABCD
-
-获取方式：在B站网页端进入自己的直播页面，按F12调出控制台，如下图
-
-![提示1](https://github.com/xiaoan-1/bilibili-ordersong-plugin/blob/main/img/help.png)
+身份码获取：[直播中心](https://link.bilibili.com/p/center/index#/my-room/start-live)  ▶ 开始直播 ▶ 身份码。
 
 ## 设置简介
 1. 网易二维码登录：点击对应登录即可弹出二维码，扫码即可

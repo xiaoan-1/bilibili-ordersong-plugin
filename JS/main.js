@@ -10,12 +10,7 @@ window.onload = function(){
     config.init();
 
     // 3. 初始化webSocket对象
-    let initSuccess = webSocket.init();
-
-    // 4. 若初始化成功,打开websoket连接直播间
-    if(initSuccess){
-        webSocket.open();
-    } 
+    webSocket.init();
 }
 
 

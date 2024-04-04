@@ -11,17 +11,11 @@ export const musicMethod = {
             div.remove();
         }, 7000)
     },
-    setCookie: function(cookie){
-        var cookiePairs = cookie.split(';'); // 分割为键值对数组
-
-        for (var i = 0; i < cookiePairs.length; i++) {
-            var pair = cookiePairs[i].trim().split('=');
-            var key = pair[0];
-            var value = pair[1];
-            
-            // 设置 Cookie
-            document.cookie = key + "=" + encodeURIComponent(value) + "; path=/";
-        }
+    
+    pageAlertRepeat: function(str){
+        setInterval(() =>{
+            this.pageAlert(str);
+        }, 7000)
     }
 }
 
