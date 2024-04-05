@@ -14,7 +14,7 @@ b站直播姬点歌H5插件
 
 个人公益链接（若无法使用请自行搭建对应API服务）
 
-http://plugin.changsheng.space/plugin?roomid=您的直播身份码
+http://plugin.changsheng.space/plugin?code=您的直播身份码
 
 身份码获取：[直播中心](https://link.bilibili.com/p/center/index#/my-room/start-live)  ▶ 开始直播 ▶ 身份码。
 
