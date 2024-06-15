@@ -1,9 +1,9 @@
-import { musicMethod } from "../../utils/method.js";
+import { publicMethod } from "../../utils/method.js";
 
 export const qqmusicServer = {
     
     // https://github.com/jsososo/QQMusicApi
-    baseUrl: "http://121.40.145.21:33422",
+    baseUrl: "",
 
     cookie: "",
 
@@ -38,7 +38,7 @@ export const qqmusicServer = {
                 };
             }
         }).catch(function(error){
-            musicMethod.pageAlert(error.message);
+            publicMethod.pageAlert(error.message);
         });
         return song;
     },
@@ -60,10 +60,10 @@ export const qqmusicServer = {
                 url = resp.data.data;
             }else{
                 console.log(resp.data);
-                musicMethod.pageAlert("链接获取失败");
+                publicMethod.pageAlert("链接获取失败");
             }
         }).catch(function(error){
-            musicMethod.pageAlert(error.message);
+            publicMethod.pageAlert(error.message);
         });
         return url;
     },
@@ -82,10 +82,10 @@ export const qqmusicServer = {
                 'Content-Type': 'application/json'
             },
         }).then(function (resp) {
-            musicMethod.pageAlert("cookie设置成功！");
+            publicMethod.pageAlert("cookie设置成功！");
             
         }).catch(function(error){
-            musicMethod.pageAlert("cookie设置失败！");
+            publicMethod.pageAlert("cookie设置失败！");
         });
     },
     /* 获取cookie
@@ -99,9 +99,9 @@ export const qqmusicServer = {
                 id: qq,
             },
         }).then(function (resp) {
-            musicMethod.pageAlert("获取cookie成功！");
+            publicMethod.pageAlert("获取cookie成功！");
         }).catch(function(error){
-            musicMethod.pageAlert("获取cookie失败！");
+            publicMethod.pageAlert("获取cookie失败！");
         });
     },
 }

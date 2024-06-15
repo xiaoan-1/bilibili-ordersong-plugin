@@ -1,0 +1,106 @@
+/* 点歌面板样式 */
+.orderTable{
+    width: 300px;
+    margin-top: 10px;
+    border-radius: 10px;
+    background: #02020279;
+    box-shadow:  0px 0px 6px #000000;
+    table-layout:fixed;
+    position: relative;
+}
+
+.orderTable thead th{
+    font-size: 20px;
+    text-align: center;
+    padding: 10px;
+    white-space: 1em;
+}
+
+.orderTable tbody td{
+    padding: 10px;
+    text-align: center;
+    /* 隐藏溢出文字 */
+    overflow: hidden;
+    white-space:nowrap; 
+    text-overflow:ellipsis;
+}
+
+/* 点歌项样式 */
+.orderTable tbody tr{
+    position: relative;
+    left: 0px;
+}
+/* 点歌项淡入 */
+@keyframes fadeIn {
+    0%{
+        left: 300px;
+    }
+    100%{
+        left: 0px;
+    }
+}
+/* 点歌项淡出 */
+@keyframes fadeOut {
+    0%{
+        left: 0px;
+    }
+    100%{
+        left: -300px;
+    }
+}
+
+/* 进度条样式 */
+.progress{
+    z-index: 1;
+    width: 280px;
+    height: 3px;
+    border-radius: 50px;
+    background: rgb(255, 255, 255);
+    /* 水平居中 */
+    position: absolute;
+    top: 50px;
+    left: 50%;
+    transform: translate(-50%, 0);
+    /* 进度条居中 */
+    display: flex;
+    align-items: center;
+}
+
+.progress_bar{
+    width: 0px;
+    height: 3px;
+    border-radius: 50px;
+    background: #3d3c3c;
+    position: relative;
+}
+
+.progress_bar .dot{
+    z-index: 2;
+    width: 3px;
+    height: 3px;
+    background: rgb(212, 211, 212);
+    border-radius: 100%;
+    box-shadow:  0px 0px 4px #000000;
+    float: right;
+}
+
+/* 音乐进度条闪烁动画 */
+.dot_blink {
+    animation: dot_blink 3s infinite;
+}
+
+@keyframes dot_blink
+{
+    0% {    
+        transform: scale(1);
+    }
+    50% {   
+        transform: scale(4);
+    }
+    100%{
+        transform: scale(1);
+    }
+}
+
+
+

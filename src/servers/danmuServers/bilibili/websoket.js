@@ -1,7 +1,8 @@
-import { config } from "../../../components/config.js";
-import { musicMethod } from "../../components/method.js";
+import { biliServer } from "./server.js";
+import { publicMethod } from "../../components/method.js";
+
 /* webSocket对象 */
-export const danmuServer_bilibili = {
+export const websocket = {
     // socket连接地址
     url: "",
 
@@ -11,10 +12,14 @@ export const danmuServer_bilibili = {
     // 直播间ID
     roomId: 0,
     
-    // websocket鉴权信息
-    uid: null,
-    buvid: null,
-    key: null,
+    // 游戏场次Id
+    gameId: 0,
+
+    // 主播ID
+    uid: 0,
+    
+    // 主播身份码
+    anchorCode: "",
 
     // 发送心跳包的定时器
     timer: null,
@@ -25,95 +30,82 @@ export const danmuServer_bilibili = {
     // 心跳包
     heartPacket: null,
 
-    // 是否正在重连
-    flag: false,
-
     // 重连次数
-    reconnect: 3,
+    reconnectCount: 3,
 
-    getDanmuMessage: null,
+    // 弹幕消息
+    danmuMessage: null,
     
     // 初始化websocket链接
-    init: function(){
+    init: async function(){
         // 检查浏览器是否支持webSocket 
         if (typeof (WebSocket) == "undefined") {
-            musicMethod.pageAlert("您的浏览器不支持WebSocket！");
+            publicMethod.pageAlert("您的浏览器不支持WebSocket!");
             return false;
         } 
 
-        // 设置连接url
-        this.url = "wss://broadcastlv.chat.bilibili.com:2245/sub";
-
-        // 获取URL中的房间id参数和鉴权参数
+        // 获取URL中的身份码参数
         let URLParam = window.location.search.substring(1).split('&');
         URLParam.forEach(str => {
             let param = str.split('=');
-            if(param.length == 2 && param[0].toLocaleUpperCase() == "ROOMID"){
-                this.roomId = parseInt(param[1]);
-                musicMethod.pageAlert("已获取直播间ID:" + this.roomId);
-            }else if (param.length == 2 && param[0].toLocaleUpperCase() == "UID") {
-                this.uid = param[1];
-            }else if (param.length == 2 && param[0].toLocaleUpperCase() == "BUVID") {
-                this.buvid = param[1];
-            }else if (param.length == 2 && param[0].toLocaleUpperCase() == "KEY") {
-                this.key = param[1];
+            console.log(param);
+            if(param.length == 2 && param[0].toLocaleUpperCase() == "CODE"){
+                this.anchorCode = param[1];
             }
         });
 
-        // 检查直播间Id
-        if(!this.roomId){
-            setInterval(function(){
-                musicMethod.pageAlert("未获取到直播间ID,请检查URL");
-            },7000);
-            return false;
+        if(this.anchorCode == ""){
+            publicMethod.pageAlertRepeat("无身份码, 请检查url参数...");
+            return;
         }
 
-        // 设置鉴权包 
-        let authInfo;
-        if(this.uid && this.buvid && this.key){
-            authInfo = {
-                "uid": this.uid,
-                "roomid": parseInt(this.roomId, 10),
-                "protover": 2,
-                "buvid":this.buvid,
-                "platform": 'web',
-                "type": 2,
-                "key": this.key
-            }
-        }else{
-            authInfo = {
-                'uid': config.adminId,
-                'roomid': parseInt(this.roomId, 10),
-                'protover': 2,
-                'platform': 'danmuji',
-                'clientver': '1.8.5',
-                'type': 2,
-            }
+        // 项目启动获取连接信息
+        let gameInfo = await biliServer.gameStart(this.anchorCode, 1711708120386);
+
+        if(!gameInfo){
+            publicMethod.pageAlertRepeat("弹幕连接信息获取失败!");
+            return;
         }
         
-        this.authPacket = this.createPacket(JSON.stringify(authInfo), 1, 7, 1)
-        
+        // 获取连接信息
+        this.url = gameInfo.websocket_info.wss_link[2];
+        this.roomId = gameInfo.anchor_info.room_id;
+        this.gameId = gameInfo.game_info.game_id;
+        this.uid = gameInfo.game_info.open_id;
+
+        // 设置鉴权包
+        this.authPacket = this.createPacket(gameInfo.websocket_info.auth_body, 1, 7, 1);;
         // 设置心跳包 
-        let heartInfo = "[object Object]"
-        this.heartPacket = this.createPacket(heartInfo, 1, 2, 1);
+        this.heartPacket = this.createPacket("[object Object]", 1, 2, 1);
 
-        musicMethod.pageAlert("已初始化webSocket连接!");
-        return true;
-    },
-    // 打开websocket连接 
-    open: function(){
-         // 检查是否已存在socket连接
+        // 检查是否已存在socket连接
         if(this.socket != null){
             this.socket.close();
-            clearInterval(this.timer);
+            delete this.socket;
+            this.socket = null;
         }
-        // 建立新的socket连接
+
+        // 初始化定时器
+        if(this.timer != null){
+            clearInterval(this.timer);
+            this.timer = null;
+        }
+
+        // 初始化socket连接
         try {
             this.socket = new WebSocket(this.url);
         } catch (error) {
+            console.log(error);
+            publicMethod.pageAlertRepeat("websocket创建失败!");
             return false;
         }
 
+        // 初始化完毕，打开弹幕连接
+        this.open();
+    },
+
+    // 打开websocket连接 
+    open: function(){
         // 1. 连接打开事件
         this.socket.onopen = ()=> {
             
@@ -121,13 +113,13 @@ export const danmuServer_bilibili = {
             this.socket.send(this.authPacket);
             this.socket.send(this.heartPacket);
 
-            //发送心跳包 每30s发送一次
+            //发送心跳包 每20s发送一次
             this.timer = setInterval(() => {
                 console.log("心跳包");
                 this.socket.send(this.heartPacket);
-            }, 30000);
+            }, 20000);
 
-            musicMethod.pageAlert("弹幕服务器连接已打开");
+            publicMethod.pageAlert("弹幕服务器连接已打开!");
         };
 
         // 2. 获得消息事件
@@ -144,55 +136,24 @@ export const danmuServer_bilibili = {
             };
         };
 
-        // 3. 连接关闭事件
-        this.socket.onclose = () => {
-            // 停止发送心跳包
-            clearInterval(this.timer);
-            if(this.flag){
-                return;
-            }
-            // 开始重连
-            this.flag = true;
-            if( this.reconnect )
-            {
-                musicMethod.pageAlert("连接已关闭，正在重连..." + this.reconnect );
-                this.reconnect--;
-                this.open();
-            }
-            else
-            {
-                setInterval(function(){
-                    musicMethod.pageAlert("重连失败! 连接已关闭!");
-                }, 7000);
-            }
-            this.flag = false;
-            
-        };
+        // 3. 连接关闭事件 => 重连
+        this.socket.onclose = () => this.reconnect;
 
-        // 4. 连接错误事件
-        this.socket.onerror = () => {
-            // 停止发送心跳包
-            clearInterval(this.timer);
-            if(this.flag){
-                return;
-            }
-            // 开始重连
-            this.flag = true;
-            if( this.reconnect )
-            {
-                musicMethod.pageAlert("连接错误，正在重连..." + this.reconnect );
-                this.reconnect--;
-                this.open();
-            }
-            else
-            {
-                setInterval(function(){
-                    musicMethod.pageAlert("重连失败! 连接已关闭!");
-                }, 7000);
-            }
-            this.flag = false;
+        // 4. 连接错误事件 => 重连
+        this.socket.onerror = () => this.reconnect;
+    },
+
+    // 重连
+    reconnect: function() {
+        if( this.reconnect ){
+            publicMethod.pageAlert("连接错误，正在重连..." + this.reconnect );
+            this.reconnect--;
+            setTimeout(this.init, 3000);
+        }else{
+            publicMethod.pageAlertRepeat("重连失败! 请确认网络/服务器状态!");
         }
     },
+
     // 处理不用解压的arraybuffer数据包
     handlePacket: function (Packet) {
         // 创建一个数据视图
@@ -229,17 +190,12 @@ export const danmuServer_bilibili = {
                 // 消息体body格式转换  (bit->Byte->string->json)
                 const jsonDanmu = JSON.parse(this.uintArrayToString(new Uint8Array(body)));
                 // 提取弹幕消息
-                if(jsonDanmu.cmd == "DANMU_MSG"){
-                    console.log(jsonDanmu);
-
-                    if(this.getDanmuMessage){
-                        this.getDanmuMessage(jsonDanmu);
-                    }
-                    // danmu.identifyDanmuCommand({
-                    //     uid: jsonDanmu.info[2][0],
-                    //     uname: jsonDanmu.info[2][1],
-                    //     danmu: jsonDanmu.info[1],
-                    // });
+                if(jsonDanmu.cmd == "LIVE_OPEN_PLATFORM_DM" && this.danmuMessage){
+                    this.danmuMessage({
+                        uid: jsonDanmu.data.open_id,
+                        uname: jsonDanmu.data.uname,
+                        danmu: jsonDanmu.data.msg,
+                    });
                 }
             }else{
                 console.log("其他消息类型");
@@ -309,6 +265,4 @@ export const danmuServer_bilibili = {
         }
         return buffer;
     },
-
-
 }

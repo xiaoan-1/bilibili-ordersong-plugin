@@ -6,158 +6,180 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>点歌列表</title>
     <!-- 库文件 -->
-    <script src="./Lib/axios.min.js"></script>
-    <script src="./Lib/pako.js"></script>
+    <!-- <script src="./Lib/axios.min.js"></script> -->
+    <!-- <script src="./Lib/pako.js"></script> -->
     <!-- main -->
-    <script type="module" src="./JS/main.js"></script>
-    <!-- 样式文件 -->
-    <link rel="stylesheet" href="./src/assets/style/main.css">
+    <script type="module" src="./src/main.js"></script>
+    <!-- 总体样式文件 -->
+    <link rel="stylesheet" href="./src/resources/style/mainPage.css">
+    <!-- 点歌面板样式 -->
+    <link rel="stylesheet" href="./src/resources/style/orderTable.css">
+    <!-- 设置面板样式 -->
+    <link rel="stylesheet" href="./src/resources/style/settingPage.css">
+    <!-- 登录面板样式 -->
+    <link rel="stylesheet" href="./src/resources/style/loginConfig.css">
+    <!-- 配置面板样式 -->
+    <link rel="stylesheet" href="./src/resources/style/orderConfig.css">
 </head>
 <body>
     <div class="main">
+        <!-- 顶层提示弹窗 -->
+        <div class="alertBox"></div>
 
-        <!-- 设置按钮，用于弹出设置界面 -->
-        <div class="setting_btn">
-            <button id="setting_btn">设置</button>
+        <!-- 进度条 -->
+        <div class="progress">
+            <div class="progress_bar">
+                <i class="dot"></i>
+            </div>
         </div>
-        
-        <!-- 点歌面板，用于显示点歌列表 -->
+
+        <!-- 点歌面板-->
         <table class="orderTable">
+            <!-- 菜单栏 -->
             <thead>
                 <th>歌名</th>
                 <th>歌手</th>
                 <th>点歌人</th>
             </thead>
-            <tbody id="orderList">
-            </tbody>
-            <div class="alertBox"></div>
-            <div class="progress">
-                <div class="progress_bar">
-                    <i class="dot"></i>
-                </div>
-            </div>
+            <!-- 点歌列表 -->
+            <tbody id="orderList"></tbody>
         </table>
 
         <!-- 设置面板 -->
-        <div class="settingPanel">   
-            <!-- 1、登录面板，用于不同音乐平台的登录-->           
-            <div class="login">
-                <!-- 音乐平台选择 -->
-                <div class="platform">
-                    <li>网易云音乐</li>
-                    <li>QQ音乐</li>
-                </div>
-                <!-- 登录方式 -->
-                <div>
-                    <!-- 账号登录 -->
-                    <div>
-                        <li>账号：<input type="text"></li>
-                        <li>密码：<input type="text"></li>
-                    </div>
-                    <!-- 验证码登录 -->
-                    <div>
-                        <li>手机号：<input type="text"></li>
-                        <li>验证码：<input type="text"></li>
-                    </div>
-                    <!-- 扫码登录 -->
-                    <div>
-                        <img id="qrImg">
-                    </div>
-                    <!-- cookie登录 -->
-                    <div>
-                        <textarea name="" id="" cols="30" rows="10"></textarea>
-                    </div>
-                </div>
-                
-                <div>
-                    <button>账号登录</button>
-                    <button>验证码登录</button>
-                    <button>扫码登录</button>
-                    <button>cookie登录</button>
-                </div>
-                <!-- <tr class="input">
-                    <td>手机号</td>
-                    <td><input type="tel" id="phone" disabled="disabled" placeholder="请使用扫码登录"></td>
-                    <td><button id="getCaptcha" disabled="disabled">获取验证码</button></td>
-                </tr>
-                <tr class="input">
-                    <td>验证码</td>
-                    <td><input type="number" id="captcha" disabled="disabled" placeholder=""></td>
-                    <td><button id="login" disabled="disabled">登录</button></td>
-                </tr>
-                <tr class="input">
-                    <td>网易云</td>
-                    <td><input type="text" id="qrInfo" disabled="disabled" placeholder="请扫码登录"></td>
-                    <td><button id="qrLogin">二维码登录</button></td>
-                </tr>
-                <tr class="input">
-                    <td>QQ音乐</td>
-                    <td><input type="tel" id="cookie" placeholder="请输入cookie"></td>
-                    <td><button id="qSetCookie">设置Cookie</button></td>
-                </tr>
-                <img id="qrImg"> -->
+        <div class="setting">
+            <div id="menu" class="setting_menu">
+                <button class="setting_btn">登录设置</button>
+                <button class="setting_btn">点歌设置</button>
+                <button class="setting_btn">弹幕设置</button>
+                <button class="setting_btn">关于</button>
             </div>
-            <!-- 2、配置项面板，用于配置点歌的一些设置-->
-            <table>
-                <tbody>                   
-                    <tr class="input">
-                        <td>管理员uid</td>
-                        <td><input type="text" id="adminId"></td>
-                    </tr>
-                    <tr class="input">
-                        <td>用户点歌数</td>
-                        <td><input type="text" id="userOrder"></td>
-                    </tr>
-                    <tr class="input">
-                        <td>最大点歌数</td>
-                        <td><input type="text" id="maxOrder"></td>
-                    </tr>
-                    <tr class="input">
-                        <td>最大歌曲时长</td>
-                        <td><input type="text" id="maxDuration"></td>
-                    </tr>
-                    <tr class="input">
-                        <td>超时限播时长</td>
-                        <td><input type="text" id="overLimit"></td>
-                    </tr>
-                    <tr class="input">
-                        <td>空闲歌单ID</td>
-                        <td><input type="text" id="songListId"></td>
-                        <td><button id="loadSongList">加载歌单</button></td>
-                    </tr>
-                    <tr class="input">
-                        <td>历史空闲歌单</td>
-                        <td><select id="freeListHistory" size="4"></select></td>
-                        <td><button id="selectSongList">选择歌单</button></td>
-                    </tr>
-                    <tr class="select">
-                        <td>历史点歌用户</td>
-                        <td><select id="userHistory" size="4"></select></td>
-                        <td><button id="addUserBlack">加入黑名单</button></td>
-                    </tr>
-                    <tr class="select">
-                        <td>用户黑名单</td>
-                        <td>
-                            <select id="userBlackList" size="4">
-                            </select>
-                        </td>
-                        <td><button id="delUserBlack">移除黑名单</button></td>
-                    </tr>
-                    <tr class="select">
-                        <td>历史点歌歌曲</td>
-                        <td><select id="songHistory" size="4"></select></td>
-                        <td><button id="addSongBlack">加入黑名单</button></td>
-                    </tr>
-                    <tr class="select">
-                        <td>歌曲黑名单</td>
-                        <td>
-                            <select id="songBlackList" size="4">
-                            </select>
-                        </td>
-                        <td><button id="delSongBlack">移除黑名单</button></td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="setting_body">
+                <div id="pages" class="setting_pages">
+                    <!-- 登录设置-->           
+                    <div class="setting_login_page">
+                        <!-- 登录面板 -->
+                        <div class="login_panel">
+                            <!-- 音乐平台选择 -->
+                            <div id="platform">
+                                <button>网易云音乐</button>
+                                <button>QQ音乐</b>
+                            </div>
+                            <!-- 登录表单 -->
+                            <div id="loginForm">
+                                <div class="login_type">
+                                    <div id="userName">Hello world</div>
+                                    <div id="userPhone">Hello world</div>
+                                    <button id="logout">退出登录</button>
+                                </div>
+                                <!-- 扫码登录 -->
+                                <div class="login_type">
+                                    <button id="qrImg">
+                                </div>
+                                <!-- 验证码登录 -->
+                                <div class="login_type">
+                                    <li>手机号：<input type="text" id="phoneNumber"></li>
+                                    <li>验证码：
+                                        <input type="text" id="captcha">
+                                        <button id="getCaptcha">获取验证码</button>
+                                    </li>
+                                    <button id="captchaLogin">登录</button>
+                                </div>
+                                <!-- 账号登录 -->
+                                <div class="login_type">
+                                    <li>账号：<input type="text" id="account"></li>
+                                    <li>密码：<input type="text" id="password"></li>
+                                    <button id="accountLogin">登录</button>
+                                </div>
+                                
+                                <!-- cookie登录 -->
+                                <div class="login_type">
+                                    <textarea name="" id="cookie" cols="30" rows="10"></textarea>
+                                    <button id="cookieLogin">登录</button>
+                                </div>
+                            </div>
+                            <!-- 登录方式 -->
+                            <div id="loginType">
+                                <button>扫码登录</button>
+                                <button>验证码登录</button>
+                                <button>账号登录</button>
+                                <button>cookie登录</button>
+                            </div>
+                            
+                        </div>
+                        <!-- 空闲歌单设置 -->
+                        <table>
+                            <tr>
+                                <td>空闲歌单ID</td>
+                                <td><input type="text" id="songListId"></td>
+                                <td><button id="loadSongList">加载歌单</button></td>
+                            </tr>
+                            <tr>
+                                <td>历史空闲歌单</td>
+                                <td><select id="freeListIdHistory" size="4"></select></td>
+                                <td><button id="selectSongList">选择歌单</button></td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- 点歌设置-->
+                    <table class="setting_order_page">
+                        <tbody>
+                            <tr class="input">
+                                <td>用户点歌数</td>
+                                <td><input type="text" id="userOrder" autocomplete="off"></td>
+                            </tr>
+                            <tr class="input">
+                                <td>最大点歌数</td>
+                                <td><input type="text" id="maxOrder" autocomplete="off"></td>
+                            </tr>
+                            <tr class="input">
+                                <td>最大歌曲时长</td>
+                                <td><input type="text" id="maxDuration" autocomplete="off"></td>
+                            </tr>
+                            <tr class="input">
+                                <td>超时限播时长</td>
+                                <td><input type="text" id="overLimit" autocomplete="off"></td>
+                            </tr>
+                            <tr class="select">
+                                <td>历史点歌用户</td>
+                                <td><select id="userHistory" size="4"></select></td>
+                                <td><button id="addUserBlack">加入黑名单</button></td>
+                            </tr>
+                            <tr class="select">
+                                <td>用户黑名单</td>
+                                <td>
+                                    <select id="userBlackList" size="4">
+                                    </select>
+                                </td>
+                                <td><button id="delUserBlack">移除黑名单</button></td>
+                            </tr>
+                            <tr class="select">
+                                <td>历史点歌歌曲</td>
+                                <td><select id="songHistory" size="4"></select></td>
+                                <td><button id="addSongBlack">加入黑名单</button></td>
+                            </tr>
+                            <tr class="select">
+                                <td>歌曲黑名单</td>
+                                <td>
+                                    <select id="songBlackList" size="4">
+                                    </select>
+                                </td>
+                                <td><button id="delSongBlack">移除黑名单</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+            
+                    <!-- 弹幕设置 -->
+                    <div class="setting_danmu_page">
+                        <p>Hello world</p>
+                    </div>
+
+                    <!-- 关于 -->
+                    <div class="setting_about_page">
+                        <p>Hello world</p>
+                    </div>
+                </di>
+            </div>
         </div>
     </div>  
 </body>

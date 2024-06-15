@@ -1,6 +1,6 @@
 
 /* 
-    音乐api扩展文件，可扩展其他音乐平台API 
+    音乐api扩展，扩展其他音乐平台API 
 */
 
 const testServer = {
@@ -21,7 +21,7 @@ const testServer = {
         }).then(function (resp) {
             console.log(resp.data);
         }).catch(function(error){
-            musicMethod.pageAlert("test error");
+            publicMethod.pageAlert("test error");
         });        
         return url;
     },

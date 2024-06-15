@@ -1,4 +1,4 @@
-import { musicMethod } from "../../utils/method.js";
+import { publicMethod } from "../../utils/method.js";
 
 export const wymusicServer = {
     
@@ -241,7 +241,7 @@ export const wymusicServer = {
             }
         }).then(function (resp) {
             if(resp.data.code < 0){
-                musicMethod.pageAlert(resp.data.message + "(登录)");
+                publicMethod.pageAlert(resp.data.message + "(登录)");
             }else if(resp.data.data[0].url){
                 url = resp.data.data[0].url;
             }
