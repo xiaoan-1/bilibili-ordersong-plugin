@@ -1,4 +1,4 @@
-import { orderConfig } from "./components/orderConfig.js";
+import { config } from "./components/config.js";
 import { login } from "./components/login.js";
 import { player } from "./components/player.js";
 
@@ -16,7 +16,7 @@ window.onload = function (){
     }
     window.ppp = player;
     // 1、初始化点歌配置
-    orderConfig.init();
+    config.init();
 
     // 2、初始化播放器模块
     player.init();

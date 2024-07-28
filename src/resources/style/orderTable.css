@@ -25,10 +25,16 @@
     text-overflow:ellipsis;
 }
 
+.orderTable tbody{
+    position: relative;
+    height: 0px;
+    transition: .5s;
+}
 /* 点歌项样式 */
 .orderTable tbody tr{
-    position: relative;
-    left: 0px;
+    position: absolute;
+    width: 300px;
+    height: 40px;
 }
 /* 点歌项淡入 */
 @keyframes fadeIn {

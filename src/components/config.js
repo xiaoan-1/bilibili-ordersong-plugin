@@ -1,7 +1,7 @@
 import { publicMethod } from "../utils/method.js";
 
-// 点歌设置
-export const orderConfig = {
+// 点歌配置
+export const config = {
 
     // 用户点歌数量限制
     userOrder: 3,

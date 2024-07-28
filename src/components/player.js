@@ -1,4 +1,4 @@
-import { orderConfig } from "./orderConfig.js";
+import { config } from "./config.js";
 import { publicMethod } from "../utils/method.js";
 
 /* 播放器对象 
@@ -122,20 +122,25 @@ export const player = {
         this.orderList.push(order);
         
         // 页面同步添加
-        var tr = document.createElement('tr');
-        tr.innerHTML = `<td>${order.song.sname}</td>
-            <td>${order.song.sartist}</td>
-            <td>${order.uname}</td></td>`;
-        tr.style.animation = "fadeIn 2s";
-        this.elem_orderList.appendChild(tr);
+        this.elem_orderList.style.height = (this.elem_orderList.clientHeight + 40) + "px";
+        setTimeout(() =>{
+            let tr = document.createElement('tr');
+            tr.innerHTML = `<td>${order.song.sname}</td>
+                <td>${order.song.sartist}</td>
+                <td>${order.uname}</td></td>`;
+            tr.style.top = (40 + (this.elem_orderList.children.length - 1) * 40) + "px"
+            tr.style.animation = "fadeIn 2s";
+            this.elem_orderList.appendChild(tr);
+        }, 500);
+        
 
         // 同时存储到配置项的历史用户列表、历史点歌列表中
-        // orderConfig.addUserHistory({
+        // config.addUserHistory({
         //     uid: order.uid,
         //     uname: order.uname,
         // });
 
-        // orderConfig.addSongHistory({
+        // config.addSongHistory({
         //     sid: order.song.sid,
         //     sname: order.song.sname,
         // });
@@ -150,28 +155,28 @@ export const player = {
         }
 
         // 查询用户是否被拉入黑名单
-        for (let i = 0; i < orderConfig.userBlackList.length; i++) {
-            if(orderConfig.userBlackList[i].uid == order.uid){
+        for (let i = 0; i < config.userBlackList.length; i++) {
+            if(config.userBlackList[i].uid == order.uid){
                 publicMethod.pageAlert("你已被加入暗杀名单!(▼へ▼メ)!");
                 return false;
             }
         }
         
         // 用户点歌数是否已达上限
-        if(this.orderList.filter(value => value.uid == order.uid).length >= orderConfig.userOrder){
+        if(this.orderList.filter(value => value.uid == order.uid).length >= config.userOrder){
             publicMethod.pageAlert("你点太多啦，歇歇吧>_<!");
             return false;
         }
 
         // 最大点歌数是否已达上限
-        if(this.orderList.length >= orderConfig.maxOrder){
+        if(this.orderList.length >= config.maxOrder){
             publicMethod.pageAlert("我装不下更多的歌啦>_<!");
             return false;
         }
         
         // 查询歌曲是否被拉入黑名单
-        for (let i = 0; i < orderConfig.songBlackList.length; i++) {
-            if(orderConfig.songBlackList[i].sid == order.song.sid){
+        for (let i = 0; i < config.songBlackList.length; i++) {
+            if(config.songBlackList[i].sid == order.song.sid){
                 publicMethod.pageAlert("请不要乱点奇怪的歌!(▼ヘ▼#)");
                 return false;
             }
@@ -184,7 +189,7 @@ export const player = {
         }
 
          // 该歌曲是否有歌曲时长限制，且歌曲时长是否超出规定时长
-        if(orderConfig.maxDuration > 0 && order.song.duration > orderConfig.maxDuration){
+        if(config.maxDuration > 0 && order.song.duration > config.maxDuration){
             publicMethod.pageAlert("你点的歌时太长啦!>_<");
             return false;
         }
@@ -216,7 +221,7 @@ export const player = {
             // 页面进度条实时修改
             progress.style.width = ((this.audio.currentTime / this.audio.duration) * 280) + "px";
             // 超过歌曲限长则自动播放下一首
-            if (orderConfig.overLimit > 0 && this.audio.currentTime > orderConfig.overLimit) {
+            if (config.overLimit > 0 && this.audio.currentTime > config.overLimit) {
                 this.playNext();
             }
         });

@@ -4,36 +4,32 @@ import { wymusicServer } from "./wymusicServer.js";
 
 export const musicServer = {
 
-    // 默认平台
-    platform: "wy",
-
-    // 平台cookie
-    cookies: [{"wy": ""},{"qq": ""}],
-
-    // 初始化
-    init: function(){
-        publicMethod.readConfig(this);
-
-        // 加载cookie数据
-        for (let i = 0; i < this.cookies.length; i++) {
-            const ck = this.cookies[i];
-            if(ck.hasOwnProperty("wy")){
-                wymusicServer.cookie = ck["wy"];
-            }else if(ck.hasOwnProperty("qq")){
-                qqmusicServer.cookie = ck["qq"];
-            }
+    getPlatform: function(platform){
+        if(platform == "wy"){
+            return wymusicServer;
+        }else if(platform == "qq"){
+            return qqmusicServer;
+        }else{
+            return wymusicServer;
         }
+    },
+
+    // 平台切换
+    switchPlatform: function(platform){
+        this.platform = platform;
+        localStorage.setItem("platform", this.platform);
     },
 
     // 获取登录状态
     getLoginStatus: async function(){
-        if(this.platform == "wy"){
+        if(this.platform == "wy" && wymusicServer.cookie){
             return await wymusicServer.loginStatus();
         }else{
-            publicMethod.pageAlert("该平台暂不支持获取歌单");
+            return null;
         }
     },
 
+    // 更新二维码
     updateQrPicture: async function(qrImg){
         if(this.platform == "wy"){
             // 先获取二维码的key
@@ -45,17 +41,17 @@ export const musicServer = {
 
             return unikey;
 
-        }else if(this.platform == "qq"){
-            publicMethod.pageAlert("暂不支持该平台二维码登录");
+        }else{
             return null;
         }
     },
 
+    // 检查二维码状态
     checkQrStatus: async function(unikey){
         if(this.platform == "wy"){
             return await wymusicServer.checkQrStatus(unikey);
-        }else if(this.platform == "qq"){
-            publicMethod.pageAlert("暂不支持该平台获取cookie");
+        }else {
+            return null;
         }
     },
 
@@ -64,9 +60,8 @@ export const musicServer = {
         if(this.platform == "wy"){
             return wymusicServer.getSongList(listId);
         }else{
-            publicMethod.pageAlert("该平台暂不支持获取歌单");
+            return null;
         }
-        return null;
     },
 
     // 获取歌曲信息
@@ -94,12 +89,11 @@ export const musicServer = {
     // 设置cookie
     setCookie: function(cookie){
         if(this.platform == "wy"){
-            wymusicServer.cookie = cookie;
-            
+            wymusicServer.cookie = cookie; 
         }else if(this.platform == "qq"){
             qqmusicServer.cookie = cookie;
         }
-        // 加载cookie数据
+        // 保存cookie
         for (let i = 0; i < this.cookies.length; i++) {
             const ck = this.cookies[i];
             if(cookie.hasOwnProperty("wy")){

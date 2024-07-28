@@ -6,6 +6,14 @@ import { musicServer } from "../servers/musicServers/musicServer.js"
     用于为用户提供界面上的配置功能
 */
 export const login = {
+    // 音乐平台
+    platform: "wy",
+
+    // 平台cookie
+    cookies: [{"wy": ""},{"qq": ""}],
+
+    // 平台对象
+    mServer: null,
 
     // 历史加载的歌单ID
     freeListIdHistory: [],
@@ -18,85 +26,80 @@ export const login = {
     // 初始化登录信息
     init: function(){
         
+        // 读取配置信息
         publicMethod.readConfig(this);
 
+        // 加载配置
         this.loadConfig();
         
+        // 添加按钮监听事件
         this.addListener();
 
         publicMethod.pageAlert("已初始化登录");
     },
     
     // 加载配置信息
-    loadConfig: function(){
-        // 加载历史歌单到设置页面中
-        for(let i = 0; i < this.freeListIdHistory.length; i++){
-            if(this.freeListIdHistory[i].platform != musicServer.platform){
-                continue;
-            }
-            let option = document.createElement('option'); 
-            option.value = this.freeListIdHistory[i].listId;
-            option.textContent = this.freeListIdHistory[i].listName;
-            this.elem_freeListIdHistory.appendChild(option);
+    loadConfig: async function(){
+        // 加载cookie数据
+        for (let i = 0; i < this.cookies.length; i++) {
+            musicServer.getPlatform(this.platform).cookie = this.cookies[i]["qq"];
         }
-        
-        // 加载歌单
-        if(this.freeListIdHistory.length > 0){
-            this.elem_songListId.value = this.freeListIdHistory[0].listId;
-            this.loadSongList();
-        }
+
+        // 设置当前音乐API服务对象
+        this.mServer = musicServer.getPlatform(this.platform);
+
+        // 获取登录信息
+        // this.getLoginInfo();
+
+        /// 加载空闲歌单
+        this.loadFreeListIdHistory();        
     },
 
     // 给页面配置项添加点击事件
     addListener: function(){
+        // 平台切换
+        let platform_elem = document.getElementById('platform');
+        platform_elem.onchange = (e) => {
+            this.platform = e.target.value;
+            // 切换音乐API服务对象
+            this.mServer = musicServer.getPlatform(this.platform);
+            // 重新加载平台歌单
+            this.loadFreeListIdHistory();
+            // 保存平台配置
+            localStorage.setItem("platform", this.platform);
+        }
+
         // 登录方式切换
         let elem_types = document.getElementById('loginType');
         let elem_forms = document.getElementById('loginForm');
-        for (let i = 0; i < elem_types.children.length; i++) {
-            const btn = elem_types.children[i];
-            btn.onclick = () => {
-                elem_forms.style.left = -(400 * (i + 1)) + "px";
-            }
+        elem_types.onchange = (e) => {
+            elem_forms.style.left = -(400 * (e.target.selectedIndex + 1)) + "px";
         }
 
         // 退出登录
-        document.getElementById('logout').onclick = () => {
-            this.logout();
-        };
+        document.getElementById('logout').onclick = () => this.logout();
 
         // 二维码登录
-        document.getElementById('qrImg').onclick = () => {
-            this.updateQrPicture();
-        };
+        document.getElementById('qrImg').onclick = () => this.updateQrPicture();
 
         // 获取验证码
         document.getElementById('getCaptcha').disabled = true;
-        document.getElementById('getCaptcha').onclick = () => {
-            this.getCaptcha();
-        };
+        document.getElementById('getCaptcha').onclick = () => this.getCaptcha();
 
         // 验证码登录
         document.getElementById('captchaLogin').disabled = true;
-        document.getElementById('captchaLogin').onclick = () => {
-            this.captchaLogin();
-        };
+        document.getElementById('captchaLogin').onclick = () => this.captchaLogin();
 
         // 账号登录
         document.getElementById('accountLogin').disabled = true;
-        document.getElementById('accountLogin').onclick = () => {
-            this.accountLogin();
-        };
+        document.getElementById('accountLogin').onclick = () => this.accountLogin();
 
         // cookie登录
         document.getElementById('cookieLogin').disabled = true;
-        document.getElementById('cookieLogin').onclick = () => {
-            this.cookieLogin();
-        };
-   
+        document.getElementById('cookieLogin').onclick = () => this.cookieLogin();
+
         // 加载歌单按钮
-        document.getElementById('loadSongList').onclick = () => {
-            this.loadSongList();
-        };
+        document.getElementById('loadSongList').onclick = () => this.loadSongList();
 
         // 选择歌单ID
         document.getElementById('selectSongList').onclick = () => {
@@ -108,6 +111,26 @@ export const login = {
             }
             this.elem_songListId.value = this.elem_freeListIdHistory[select].value;
         };
+    },
+
+    // 获取登录信息
+    getLoginInfo: async function(){
+        let loginStatus = await this.mServer.loginStatus();
+        if(loginStatus && loginStatus.code == 200){
+            // 获取当前cookie登录的手机号（隐藏信息）
+            document.getElementById('userName').value = loginStatus.account.userName; 
+            document.getElementById('userPhone').value = loginStatus.account.phone; 
+            // 跳转至用户信息页
+            document.getElementById('loginForm').style.left = "0px";
+        }else{
+            // 默认跳转至扫码登录
+            document.getElementById('loginForm').style.left = "-400px";
+            // 可点击刷新二维码
+            const qrImg_elem = document.getElementById('qrImg');
+            qrImg_elem.disabled = false;
+            qrImg_elem.textContent = "刷新二维码";
+            publicMethod.pageAlert("用户信息获取失败!");
+        }
     },
 
     // 加载空闲歌单
@@ -124,7 +147,7 @@ export const login = {
             return;
         }
         // 获取新的歌单列表
-        let songList = await musicServer.getSongList(listId);
+        let songList = await this.mServer.getSongList(listId);
         if(!songList.length){
             publicMethod.pageAlert("歌单列表获取失败!");
             return false;
@@ -140,55 +163,115 @@ export const login = {
         publicMethod.pageAlert("已获取空闲歌单列表!");
     },
 
-    // 读取配置数据到设置页面中
-    getUserInfo: async function(){
-        // 获取登录信息
-        let loginStatus = await musicServer.getLoginStatus();
-        if(loginStatus.code == 200){
-            // 获取当前cookie登录的手机号（隐藏信息）
-            document.getElementById('userName').value = loginStatus.account.userName; 
-            document.getElementById('userPhone').value = loginStatus.account.phone; 
+    // 加载历史歌单列表
+    loadFreeListIdHistory: function(){
+        // 加载历史歌单到设置页面中
+        for(let i = 0; i < this.freeListIdHistory.length; i++){
+            if(this.freeListIdHistory[i].platform != musicServer.platform){
+                continue;
+            }
+            let option = document.createElement('option'); 
+            option.value = this.freeListIdHistory[i].listId;
+            option.textContent = this.freeListIdHistory[i].listName;
+            this.elem_freeListIdHistory.appendChild(option);
+        }
 
-            // 跳转至用户信息页
-            document.getElementById('loginForm').style.left = "0px";
-        }else{
-            publicMethod.pageAlert("用户信息获取失败!");
+        // 加载设置页面的第一个歌单
+        if(this.elem_freeListIdHistory.options.length > 0){
+            this.elem_songListId.value = this.elem_freeListIdHistory.options[0].value;
+            this.loadSongList();
         }
     },
-    
+
+    // 添加历史空闲歌单ID
+    addFreeListIdHistory: function(listId){
+        // 歌单ID查重
+        for (let i = 0; i < this.freeListIdHistory.length; i++) {
+            if(this.freeListIdHistory[i].platform == musicServer.platform && 
+                this.freeListIdHistory[i].listId == listId){
+                return;
+            }
+        }
+        // 限长
+        if(this.freeListIdHistory.length > 50){
+            this.freeListIdHistory.shift();
+        }
+
+        // 添加歌单信息
+        this.freeListIdHistory.push({
+            platform: musicServer.platform,
+            listId: listId,
+            listName: listId
+        });
+
+        // 新建选项
+        let elem_option = document.createElement('option');
+        elem_option.value = listId;
+        elem_option.textContent = listId;
+        this.elem_freeListIdHistory.appendChild(elem_option);
+
+        // 保存配置信息
+        localStorage.setItem("freeSongList", JSON.stringify(this.freeListIdHistory));
+    },
+
+    // 退出登录
     logout: async function(){
         // 退出后默认跳转至扫码登录
         document.getElementById('loginForm').style.left = "-400px";
+        // 可点击刷新二维码
+        const qrImg_elem = document.getElementById('qrImg');
+        qrImg_elem.disabled = false;
+        qrImg_elem.textContent = "刷新二维码";
     },
 
     // 扫码登录，更新二维码
     updateQrPicture: async function(){
         // 二维码图片
-        let qrImg = document.getElementById('qrImg'); 
-        let unikey = await musicServer.getQrPictureUrl(qrImg);
+        let qrImg = document.getElementById('qrImg');
+
+        // 先获取二维码的key
+        let unikey = await this.mServer.getQrKey();
+        if(!unikey){
+            qrImg.textContent = "二维码获取失败！";
+            return;
+        }
+
+        // 用二维码key获取二维码图片地址
+        let url = await this.mServer.getQrPicture(unikey);
+        
+        // 显示二维码/设置不可点击刷新
+        qrImg.setAttribute("src", url);
+        qrImg.disabled = true;
+        qrImg.textContent = "";
 
         // 轮询二维码状态
         qrCheck = setInterval(async () => {
             let data = await musicServer.checkQrStatus(unikey);
             if (!data) {
-                publicMethod.pageAlert("请求失败!");
+                qrImg.disabled = false;
+                qrImg.textContent = "刷新二维码";
                 clearInterval(qrCheck);
+                publicMethod.pageAlert("获取二维码状态失败!");
             }else if(data.code == 800){
                 // 二维码过期
-                publicMethod.pageAlert("二维码已过期");
+                qrImg.disabled = false;
+                qrImg.textContent = "刷新二维码";
                 clearInterval(qrCheck);
+                publicMethod.pageAlert("二维码已过期");
             }else if(data.code == 803){
                 // 授权成功, 保存cookie
                 musicServer.setCookie(data.cookie);
-                publicMethod.pageAlert("登录成功！");
-                // 清除定时器
+                qrImg.setAttribute("src", "");
+                // 加载登录信息
+                this.getLoginInfo();
                 clearInterval(qrCheck);
+                publicMethod.pageAlert("登录成功！");
             }
         }, 3000)
     },
 
     // 获取验证码
-    getCaptcha: async function(e){
+    getCaptcha: async function(){
         // 校验手机号格式 
         var regExp = new RegExp("^1[356789]\\d{9}$");
         if(phone.value != "" && regExp.test(phone.value)){     
@@ -221,7 +304,7 @@ export const login = {
     },
 
     // 验证码登录
-    captchaLogin: async function(e){
+    captchaLogin: async function(){
         if(this.cookie == null){
             // 如果当前不存在cookie，则进行登录获取cookie
             if(phone.value != null && captcha.value != ""){
@@ -269,42 +352,12 @@ export const login = {
     },
 
     // 账号登录
-    accountLogin: async function(e){
+    accountLogin: async function(){
         publicMethod.pageAlert("暂不支持!");
     },
+
     // cookie登录
-    cookieLogin: async function(e){
+    cookieLogin: async function(){
         publicMethod.pageAlert("暂不支持!");
     },
-
-    // 添加历史空闲歌单ID
-    addFreeListIdHistory: function(listId){
-         // 歌单ID查重
-         for (let i = 0; i < this.freeListIdHistory.length; i++) {
-            if(this.freeListIdHistory[i].platform == musicServer.platform && 
-                this.freeListIdHistory[i].listId == listId){
-                return;
-            }
-        }
-        // 限长
-        if(this.freeListIdHistory.length > 50){
-            this.freeListIdHistory.shift();
-        }
-
-        // 添加歌单信息
-        this.freeListIdHistory.push({
-            platform: musicServer.platform,
-            listId: listId,
-            listName: listId
-        });
-
-        // 新建选项
-        let elem_option = document.createElement('option');
-        elem_option.value = listId;
-        elem_option.textContent = listId;
-        this.elem_freeListIdHistory.appendChild(elem_option);
-
-        // 保存配置信息
-        localStorage.setItem("freeSongList", JSON.stringify(this.freeListIdHistory));
-    }
 }
