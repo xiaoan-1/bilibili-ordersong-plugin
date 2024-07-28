@@ -24,6 +24,9 @@ export const player = {
     // 歌曲播放时音量淡入，降低卡顿影响
     playFadeIn: null,
 
+    // 播放模式（ 0：随机播放，1：顺序播放，2：单曲循环）
+    playMode: 0,
+
     // 初始化播放器
     init: function(){
         try {
@@ -80,7 +83,6 @@ export const player = {
             this.elem_orderList.firstElementChild.addEventListener("animationend", () => {                
                 this.elem_orderList.firstElementChild.remove();
             });
-            
         }
         if(!this.orderList.length){
             // 若点歌列表没有歌曲，则随机播放空闲歌单的歌曲
@@ -88,23 +90,29 @@ export const player = {
                 publicMethod.pageAlert("没有下一首可以放了>_<!");
                 return;
             }
-            // 随机检测，减小重复几率
-            while(true)
-            {
-                this.freeIndex = parseInt(Math.random() * this.freeList.length, 10);
-                if(!this.randomList.includes(this.freeIndex))
+            if(this.playMode == 0){
+                // 随机播放
+                while(true)
                 {
-                    // 在末尾添加随机记录
-                    this.randomList.push(this.freeIndex);
-                    // 如果随机记录大于一半，就删除第一个，(队列结构)
-                    if(this.randomList.length > this.freeList.length / 2)
+                    // 随机检测，减小重复几率
+                    this.freeIndex = parseInt(Math.random() * this.freeList.length, 10);
+                    if(!this.randomList.includes(this.freeIndex))
                     {
-                        this.randomList.shift();
+                        // 在末尾添加随机记录
+                        this.randomList.push(this.freeIndex);
+                        // 如果随机记录大于一半，就删除第一个，(队列结构)
+                        if(this.randomList.length > this.freeList.length / 2)
+                        {
+                            this.randomList.shift();
+                        }
+                        break;
                     }
-                    break;
                 }
+            }else if(this.playMode == 1){
+                // 顺序播放
+                this.freeIndex = (this.freeIndex++) % this.freeList.length;
             }
-            this.addOrder(this.freeList[this.freeIndex++]);
+            this.addOrder(this.freeList[this.freeIndex]);
         }
         
         // 播放当前第一首歌曲

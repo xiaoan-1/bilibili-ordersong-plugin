@@ -58,8 +58,7 @@ export const login = {
     // 给页面配置项添加点击事件
     addListener: function(){
         // 平台切换
-        let platform_elem = document.getElementById('platform');
-        platform_elem.onchange = (e) => {
+        document.getElementById('platform').onchange = (e) => {
             this.platform = e.target.value;
             // 切换音乐API服务对象
             this.mServer = musicServer.getPlatform(this.platform);
@@ -70,9 +69,8 @@ export const login = {
         }
 
         // 登录方式切换
-        let elem_types = document.getElementById('loginType');
         let elem_forms = document.getElementById('loginForm');
-        elem_types.onchange = (e) => {
+        document.getElementById('loginType').onchange = (e) => {
             elem_forms.style.left = -(400 * (e.target.selectedIndex + 1)) + "px";
         }
 
@@ -100,6 +98,13 @@ export const login = {
 
         // 加载歌单按钮
         document.getElementById('loadSongList').onclick = () => this.loadSongList();
+
+        // 选择空闲歌单的播放模式
+        document.getElementById('playMode').onchange = (e) => {
+            player.playMode = e.target.value;
+            // 保存配置
+            localStorage.setItem("playMode", e.target.value);
+        }
 
         // 选择歌单ID
         document.getElementById('selectSongList').onclick = () => {
