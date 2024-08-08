@@ -15,6 +15,7 @@ window.onload = function (){
         }
     }
     window.ppp = player;
+    window.lll = login;
     // 1、初始化点歌配置
     config.init();
 

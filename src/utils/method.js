@@ -28,8 +28,8 @@ export const publicMethod = {
             }else if( typeof obj[key] == "number"){
                 // 数字类型配置项
                 obj[key] = parseInt(localStorage.getItem(key));
-            }else if(Array.isArray( obj[key] )){
-                // 数组类型配置项
+            }else if(typeof obj[key] == "object" || Array.isArray( obj[key] )){
+                // 对象和数组
                 obj[key] = JSON.parse(localStorage.getItem(key));
             }
             // 其他为function类型

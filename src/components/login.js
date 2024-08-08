@@ -10,7 +10,7 @@ export const login = {
     platform: "wy",
 
     // 平台cookie
-    cookies: [{"wy": ""},{"qq": ""}],
+    cookies: {"wy": "","qq": ""},
 
     // 平台对象
     mServer: null,
@@ -28,7 +28,6 @@ export const login = {
         
         // 读取配置信息
         publicMethod.readConfig(this);
-
         // 加载配置
         this.loadConfig();
         
@@ -40,19 +39,37 @@ export const login = {
     
     // 加载配置信息
     loadConfig: async function(){
-        // 加载cookie数据
-        for (let i = 0; i < this.cookies.length; i++) {
-            musicServer.getPlatform(this.platform).cookie = this.cookies[i]["qq"];
-        }
 
         // 设置当前音乐API服务对象
         this.mServer = musicServer.getPlatform(this.platform);
+        
+        // 加载cookie数据
+        this.mServer.cookie = this.cookies[this.platform];
+        
+        // 如果当前平台的cookie为空，则进行游客登录
+        if(this.mServer.cookie == ""){
+            let data = await this.mServer.anonimousLogin();
+            
+            if(data.code == 200){
+                this.cookies[this.platform] = data.cookie;
+                this.mServer.cookie = data.cookie;
+                localStorage.setItem("cookies", JSON.stringify(this.cookies));
+            }else{
+                publicMethod.pageAlert("游客登录失败!");
+            }
+        }
 
         // 获取登录信息
-        // this.getLoginInfo();
+        let result = await this.getLoginInfo();
 
-        /// 加载空闲歌单
-        this.loadFreeListIdHistory();        
+        // 成功获取登录信息后才获取歌单信息
+        if(result){
+            /// 加载空闲歌单
+            this.loadFreeListIdHistory();
+            
+            // 加载歌单
+            this.loadSongList(this.freeListId);
+        }
     },
 
     // 给页面配置项添加点击事件
@@ -97,7 +114,21 @@ export const login = {
         document.getElementById('cookieLogin').onclick = () => this.cookieLogin();
 
         // 加载歌单按钮
-        document.getElementById('loadSongList').onclick = () => this.loadSongList();
+        document.getElementById('loadSongList').onclick = () => {
+            let listId = e.target.value;
+            // 无效ID
+            if(!listId){
+                publicMethod.pageAlert("歌单Id无效!");
+                return;
+            }
+            // 重复ID
+            if(this.freeListId == listId){
+                publicMethod.pageAlert("歌单ID未修改");
+                return;
+            }
+            
+            this.loadSongList(listId)
+        };
 
         // 选择空闲歌单的播放模式
         document.getElementById('playMode').onchange = (e) => {
@@ -109,7 +140,6 @@ export const login = {
         // 选择歌单ID
         document.getElementById('selectSongList').onclick = () => {
             let select = this.elem_freeListIdHistory.selectedIndex;
-            console.log(select);
             if(select < 0){
                 publicMethod.pageAlert("未选择歌单！");
                 return;
@@ -120,13 +150,14 @@ export const login = {
 
     // 获取登录信息
     getLoginInfo: async function(){
-        let loginStatus = await this.mServer.loginStatus();
+        let loginStatus = await this.mServer.getUserDetail();
         if(loginStatus && loginStatus.code == 200){
             // 获取当前cookie登录的手机号（隐藏信息）
-            document.getElementById('userName').value = loginStatus.account.userName; 
-            document.getElementById('userPhone').value = loginStatus.account.phone; 
+            document.getElementById('userName').textContent = loginStatus.account.userName; 
+            document.getElementById('userPhone').textContent = loginStatus.account.phone; 
             // 跳转至用户信息页
             document.getElementById('loginForm').style.left = "0px";
+            return true;
         }else{
             // 默认跳转至扫码登录
             document.getElementById('loginForm').style.left = "-400px";
@@ -135,22 +166,12 @@ export const login = {
             qrImg_elem.disabled = false;
             qrImg_elem.textContent = "刷新二维码";
             publicMethod.pageAlert("用户信息获取失败!");
+            return false;
         }
     },
 
     // 加载空闲歌单
-    loadSongList: async function(){
-        let listId = this.elem_songListId.value;
-        // 无效ID
-        if(!listId){
-            publicMethod.pageAlert("歌单Id无效!");
-            return;
-        }
-        // 重复ID
-        if(this.freeListId == listId){
-            publicMethod.pageAlert("歌单ID未修改");
-            return;
-        }
+    loadSongList: async function(listId){
         // 获取新的歌单列表
         let songList = await this.mServer.getSongList(listId);
         if(!songList.length){
@@ -165,26 +186,25 @@ export const login = {
 
         // 添加到历史记录中
         this.addFreeListIdHistory(listId);
+        // 保存配置
+        localStorage.setItem("freeListId", this.freeListId);
         publicMethod.pageAlert("已获取空闲歌单列表!");
     },
 
     // 加载历史歌单列表
     loadFreeListIdHistory: function(){
+        // 设置默认歌单
+        this.elem_songListId.value = this.freeListId;
+        
         // 加载历史歌单到设置页面中
         for(let i = 0; i < this.freeListIdHistory.length; i++){
-            if(this.freeListIdHistory[i].platform != musicServer.platform){
+            if(this.freeListIdHistory[i].platform != this.platform){
                 continue;
             }
             let option = document.createElement('option'); 
             option.value = this.freeListIdHistory[i].listId;
             option.textContent = this.freeListIdHistory[i].listName;
             this.elem_freeListIdHistory.appendChild(option);
-        }
-
-        // 加载设置页面的第一个歌单
-        if(this.elem_freeListIdHistory.options.length > 0){
-            this.elem_songListId.value = this.elem_freeListIdHistory.options[0].value;
-            this.loadSongList();
         }
     },
 
@@ -250,8 +270,9 @@ export const login = {
         qrImg.textContent = "";
 
         // 轮询二维码状态
-        qrCheck = setInterval(async () => {
-            let data = await musicServer.checkQrStatus(unikey);
+        let qrCheck = setInterval(async () => {
+            let data = await this.mServer.checkQrStatus(unikey);
+            console.log(data);
             if (!data) {
                 qrImg.disabled = false;
                 qrImg.textContent = "刷新二维码";
@@ -265,7 +286,10 @@ export const login = {
                 publicMethod.pageAlert("二维码已过期");
             }else if(data.code == 803){
                 // 授权成功, 保存cookie
-                musicServer.setCookie(data.cookie);
+                this.cookies[this.platform] = data.cookie;
+                this.mServer.cookie = data.cookie;
+                localStorage.setItem("cookies", JSON.stringify(this.cookies));
+                
                 qrImg.setAttribute("src", "");
                 // 加载登录信息
                 this.getLoginInfo();

@@ -1,5 +1,4 @@
 import { publicMethod } from "../../utils/method.js";
-
 export const wymusicServer = {
     
     // 服务器地址
@@ -134,7 +133,7 @@ export const wymusicServer = {
             }
         }).then(function (resp) {
             // cookie
-            this.cookie = resp.data;
+            data = resp.data;
         }).catch(function(error){
             console.log("获取二维码扫描状态失败!", error.response);
         });
@@ -167,7 +166,6 @@ export const wymusicServer = {
             }
         }).then(function (resp) {
             data = resp.data;
-            console.log(resp.data);
         }).catch(function(error){
             console.log("获取用户详情失败!", error.response);
         });
@@ -209,13 +207,11 @@ export const wymusicServer = {
             // 获取歌曲列表
             let songs = resp.data.result.songs;
             if(songs.length > 0){
-                // 根据歌曲ID获取歌曲链接
-                let songurl = this.getSongUrl(songs[0].id);
                 // 封装歌曲信息
                 song = {
                     platform: "wy",
                     sid: songs[0].id,
-                    url: songurl,
+                    url: null,
                     sname: songs[0].name,
                     sartist:songs[0].artists[0].name,
                     duration: songs[0].duration / 1000 ,
@@ -263,18 +259,20 @@ export const wymusicServer = {
                 cookie: this.cookie,
                 id: listId
             }
-        }).then(function (resp) {
+        }).then(async function (resp) {
             let songs = resp.data.songs;
             // 获取歌单的所有歌曲
             for(let i = 0; i < songs.length; i++){
                 let song = {
-                    uid: 123456,
+                    uid: 0,
                     uname: "空闲歌单",
                     song: {
                         platform: "wy",
                         sid: songs[i].id,
+                        url: null,
                         sname:songs[i].name,
-                        sartist:songs[i].ar[0].name
+                        sartist:songs[i].ar[0].name,
+                        // duration: songs[0].duration / 1000 ,
                     }
                 }
                 songList.push(song);

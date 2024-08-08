@@ -1,5 +1,6 @@
 import { config } from "./config.js";
 import { publicMethod } from "../utils/method.js";
+import { musicServer } from "../servers/musicServers/musicServer.js";
 
 /* 播放器对象 
     用于控制歌曲的添加、播放等
@@ -45,10 +46,15 @@ export const player = {
     },
 
     // 播放歌曲
-    play: function(song){
+    play: async function(song){
 
         // 设置播放链接
-        this.audio.src = song.url;
+        if(song.url){
+            this.audio.src = song.url;
+        }else{
+            // 根据平台查询歌曲链接
+            this.audio.src = await musicServer.getPlatform(song.platform).getSongUrl(song.sid);
+        }
 
         /*----------------------------音量淡入-------------------------------*/
         if(this.playFadeIn){
@@ -122,9 +128,9 @@ export const player = {
     // 添加点歌对象
     addOrder: function(order){
         // 检查点歌信息
-        // if(!this.checkOrder(order)){
-        //     return;
-        // }
+        if(!this.checkOrder(order)){
+            return;
+        }
 
         // 点歌成功，添加点歌信息到点歌列表中
         this.orderList.push(order);
@@ -143,15 +149,15 @@ export const player = {
         
 
         // 同时存储到配置项的历史用户列表、历史点歌列表中
-        // config.addUserHistory({
-        //     uid: order.uid,
-        //     uname: order.uname,
-        // });
+        config.addUserHistory({
+            uid: order.uid,
+            uname: order.uname,
+        });
 
-        // config.addSongHistory({
-        //     sid: order.song.sid,
-        //     sname: order.song.sname,
-        // });
+        config.addSongHistory({
+            sid: order.song.sid,
+            sname: order.song.sname,
+        });
     },
 
     // 检查点歌信息
@@ -244,7 +250,7 @@ export const player = {
             setTimeout(() =>{
                 // 播放下一首歌曲
                 this.playNext();  
-            }, 3000);
+            }, 6000);
         });
     },
 
