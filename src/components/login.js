@@ -50,7 +50,7 @@ export const login = {
         if(this.mServer.cookie == ""){
             let data = await this.mServer.anonimousLogin();
             
-            if(data.code == 200){
+            if(data && data.code == 200){
                 this.cookies[this.platform] = data.cookie;
                 this.mServer.cookie = data.cookie;
                 localStorage.setItem("cookies", JSON.stringify(this.cookies));

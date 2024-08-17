@@ -1,9 +1,8 @@
-import { player } from "./player";
-import { musicServer } from "../servers/musicServers/musicServer";
-import { danmuServer } from "../servers/danmuServers/danmuServer";
-import { publicMethod } from "../utils/method";
-
-
+import { player } from "./player.js";
+import { publicMethod } from "../utils/method.js";
+import { musicServer } from "../servers/musicServers/musicServer.js";
+import { danmuServer } from "../servers/danmuServers/danmuServer.js"
+ 
 /* 在此处启动弹幕服务 */
 export const danmu = {
 
@@ -11,10 +10,10 @@ export const danmu = {
     adminId: "",
 
     // 弹幕平台(bilibili)
-    danmuPlatform: "",
+    danmuPlatform: "bilibili",
 
     // 弹幕服务
-    danmuServer: null,
+    dServer: null,
 
     // 启动弹幕服务
     init: function(){
@@ -23,28 +22,28 @@ export const danmu = {
         publicMethod.readConfig(this);
 
         // 设置弹幕服务对象
-        this.danmuServer = danmuServer.getPlatform(this.platform);
+        this.dServer = danmuServer.getPlatform(this.platform);
 
         // 初始化弹幕服务器
-        this.danmuServer.init();
-        this.adminId =  this.danmuServer.uid;
-        this.danmuServer.danmuMessage = this.identifyDanmuCommand;
+        this.dServer.init();
+        this.adminId =  this.dServer.uid;
+        this.dServer.danmuMessage = this.identifyDanmuCommand;
     },
 
     /*  识别弹幕命令
         @param: danmu 包括用户id、用户名、用户弹幕
     */
-    identifyDanmuCommand: async function(danmu){
-        let danmu = userDanmu.danmu.trim();
+    identifyDanmuCommand: async function(userDanmu){
+        let danmuMsg = userDanmu.danmu.trim();
 
         // 点歌命令触发
         let order = null;
-        if (danmu.slice(0, 2) == "点歌") {
+        if (danmuMsg.slice(0, 2) == "点歌") {
             // 获取点歌关键词
-            let keyword = danmu.slice(2).trim();
-            let platform = keyword.danmu.slice(0, 2); 
+            let keyword = danmuMsg.slice(2).trim();
+            let platform = keyword.slice(0, 2); 
             // 根据平台通过API查询歌曲信息
-            let song = musicServer.getPlatform(platform).getSongInfo(keyword);
+            let song = await musicServer.getPlatform(platform).getSongInfo(keyword);
             
             if(!song){
                 publicMethod.pageAlert("挺好听的，虽然我没找到<(▰˘◡˘▰)>");
@@ -65,7 +64,7 @@ export const danmu = {
                 player.playNext();
             }
 
-        }else if (danmu == "切歌") { 
+        }else if (danmuMsg == "切歌") { 
             // 切歌命令，触发切歌流程
             if(player.orderList[0].uid == 0 || player.orderList[0].uid == userDanmu.uid || userDanmu.uid == this.uid){
                 // 如果当前播放的是空闲歌单、用户歌曲，或者发送命令的是管理员，则播放下一首歌曲
@@ -73,13 +72,13 @@ export const danmu = {
             }else{
                 publicMethod.pageAlert("不能切别人点的歌哦(^o^)");
             }
-        }else if(danmu == "暂停"){
+        }else if(danmuMsg == "暂停"){
             if(userDanmu.uid == this.adminId){
                 player.audio.pause();
             }else{
                 publicMethod.pageAlert("您没有改权限进行该操作~");
             }
-        }else if(danmu == "播放"){
+        }else if(danmuMsg == "播放"){
             if(userDanmu.uid == this.adminId){
                 player.audio.play();
             }else{

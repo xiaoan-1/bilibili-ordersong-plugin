@@ -1,4 +1,5 @@
 import { config } from "./components/config.js";
+import { danmu } from "./components/danmu.js";
 import { login } from "./components/login.js";
 import { player } from "./components/player.js";
 
@@ -14,8 +15,6 @@ window.onload = function (){
             elem_pages.style.left = -(520 * i) + "px";
         }
     }
-    window.ppp = player;
-    window.lll = login;
     // 1、初始化点歌配置
     config.init();
 
@@ -25,6 +24,6 @@ window.onload = function (){
     // 3、初始化登录模块 
     login.init();
     
-    // 4、初始化
-    
+    // 4、初始化弹幕服务器
+    danmu.init();
 }

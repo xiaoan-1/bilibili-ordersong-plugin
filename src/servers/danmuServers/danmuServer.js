@@ -1,4 +1,4 @@
-import { bilibili } from "./bilibili/websoket.js";
+import { websocket as bilibili } from "./bilibili/websoket.js";
 
 
 /* 在此处启动弹幕服务 */

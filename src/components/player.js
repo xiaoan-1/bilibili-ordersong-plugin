@@ -49,7 +49,7 @@ export const player = {
     play: async function(song){
 
         // 设置播放链接
-        if(song.url){
+        if(song.url && song.url != ""){
             this.audio.src = song.url;
         }else{
             // 根据平台查询歌曲链接
@@ -85,10 +85,32 @@ export const player = {
         if(this.orderList.length > 0){
             // 若点歌列表存在歌曲，则删除第一首
             this.orderList.shift();
-            this.elem_orderList.firstElementChild.style.animation = "fadeOut 2s";
-            this.elem_orderList.firstElementChild.addEventListener("animationend", () => {                
-                this.elem_orderList.firstElementChild.remove();
-            });
+
+            // 遍历所有点歌项
+            for (let i = 0; i < this.elem_orderList.children.length; i++) {
+                const elem = this.elem_orderList.children[i];
+
+                // 点歌项处于删除过程
+                if(elem.getAttribute("state") == "deleting"){
+                    continue;
+                }
+                // 设置该元素为删除状态
+                elem.setAttribute("state", "deleting");
+                // 设置删除动画效果
+                elem.style.animation = "fadeOut 1s 1";
+                setTimeout(() => {
+                    // 删除点歌项
+                    elem.remove();
+                    // 所有点歌项位置上移动一个单位
+                    for (let j = i; j < this.elem_orderList.children.length; j++) {
+                        const elem_other = this.elem_orderList.children[j];
+                        elem_other.style.top = (elem_other.offsetTop - 40) + "px";
+                    }
+                    // 缩减点歌表高度
+                    this.elem_orderList.style.height = (this.elem_orderList.clientHeight - 40) + "px"
+                }, 800);
+                break;
+            } 
         }
         if(!this.orderList.length){
             // 若点歌列表没有歌曲，则随机播放空闲歌单的歌曲
@@ -135,17 +157,21 @@ export const player = {
         // 点歌成功，添加点歌信息到点歌列表中
         this.orderList.push(order);
         
-        // 页面同步添加
+        // 页面同步添加点歌项
         this.elem_orderList.style.height = (this.elem_orderList.clientHeight + 40) + "px";
+        // 延迟动画
         setTimeout(() =>{
             let tr = document.createElement('tr');
             tr.innerHTML = `<td>${order.song.sname}</td>
                 <td>${order.song.sartist}</td>
                 <td>${order.uname}</td></td>`;
+            // 设置该点歌项状态
+            tr.setAttribute("state", "wait");
             tr.style.top = (40 + (this.elem_orderList.children.length - 1) * 40) + "px"
-            tr.style.animation = "fadeIn 2s";
+            tr.style.animation = "fadeIn 1s 1";
             this.elem_orderList.appendChild(tr);
-        }, 500);
+        }, 200);
+        
         
 
         // 同时存储到配置项的历史用户列表、历史点歌列表中
@@ -162,12 +188,6 @@ export const player = {
 
     // 检查点歌信息
     checkOrder: function(order){
-        // 检查歌曲链接是否存在
-        if(!order.song.url || order.song.url == ""){
-            publicMethod.pageAlert("歌曲链接丢失啦~");
-            return false;
-        }
-
         // 查询用户是否被拉入黑名单
         for (let i = 0; i < config.userBlackList.length; i++) {
             if(config.userBlackList[i].uid == order.uid){

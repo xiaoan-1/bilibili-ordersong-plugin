@@ -1,5 +1,5 @@
-import { biliServer } from "./server.js";
-import { publicMethod } from "../../components/method.js";
+import { server } from "./server.js";
+import { publicMethod } from "../../../utils/method.js";
 
 /* webSocket对象 */
 export const websocket = {
@@ -60,7 +60,7 @@ export const websocket = {
         }
 
         // 项目启动获取连接信息
-        let gameInfo = await biliServer.gameStart(this.anchorCode, 1711708120386);
+        let gameInfo = await server.gameStart(this.anchorCode, 1711708120386);
 
         if(!gameInfo){
             publicMethod.pageAlertRepeat("弹幕连接信息获取失败!");

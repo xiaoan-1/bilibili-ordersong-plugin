@@ -136,4 +136,22 @@
     box-shadow: 1px 1px 10px rgb(0, 0, 0);
 }
 
+.setting table ul{
+    width: 80%;
+    height: 200px;
+    margin: 0px auto;
+    padding: 0px;
+    overflow: scroll;
+    outline: none;
+    border: 1px solid black;
+    border-radius: 7px;
+    text-align: left;
+    text-align-last: left;
+    position: relative;
+}
 
+.setting table ul li{
+    width: 100%;
+    list-style-type: none;
+    transition: .5s;
+}

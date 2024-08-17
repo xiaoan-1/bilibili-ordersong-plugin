@@ -1,5 +1,4 @@
-import {axios} from "../../../libraries/axios.min.js"
-import { musicMethod } from "../public/method.js";
+import { publicMethod } from "../../../utils/method.js";
 
 export const server = {
 
@@ -23,11 +22,11 @@ export const server = {
                 gameInfo = resp.data.data;
             }else{
                 console.log(resp.data);
-                musicMethod.pageAlert(resp.data.message);
+                publicMethod.pageAlert(resp.data.message);
             }
         }).catch(function(error){
             console.log(error);
-            musicMethod.pageAlert("项目启动失败!");
+            publicMethod.pageAlert("项目启动失败!");
         });
         return gameInfo;
     },
@@ -47,7 +46,7 @@ export const server = {
                 console.log("项目心跳成功!");
             }else{
                 console.log(resp.data);
-                musicMethod.pageAlert("项目心跳失败!", resp.data.message);
+                publicMethod.pageAlert("项目心跳失败!", resp.data.message);
             }
         }).catch(function(error){
             console.log("项目心跳失败!", error.message);
