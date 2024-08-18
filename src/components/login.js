@@ -114,8 +114,8 @@ export const login = {
         document.getElementById('cookieLogin').onclick = () => this.cookieLogin();
 
         // 加载歌单按钮
-        document.getElementById('loadSongList').onclick = () => {
-            let listId = e.target.value;
+        document.getElementById('loadSongList').onclick = (e) => {
+            let listId = document.getElementById("songListId").value;
             // 无效ID
             if(!listId){
                 publicMethod.pageAlert("歌单Id无效!");
