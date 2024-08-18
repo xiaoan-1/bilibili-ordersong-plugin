@@ -115,8 +115,11 @@ export const websocket = {
 
             //发送心跳包 每20s发送一次
             this.timer = setInterval(() => {
-                console.log("心跳包");
+                // 项目心跳
+                server.gameHeartbeat(this.gameId);
+                // ws心跳包
                 this.socket.send(this.heartPacket);
+                console.log("心跳包");
             }, 20000);
 
             publicMethod.pageAlert("弹幕服务器连接已打开!");
@@ -191,6 +194,7 @@ export const websocket = {
                 const jsonDanmu = JSON.parse(this.uintArrayToString(new Uint8Array(body)));
                 // 提取弹幕消息
                 if(jsonDanmu.cmd == "LIVE_OPEN_PLATFORM_DM" && this.danmuMessage){
+                    console.log(jsonDanmu);
                     this.danmuMessage({
                         uid: jsonDanmu.data.open_id,
                         uname: jsonDanmu.data.uname,
