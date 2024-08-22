@@ -64,6 +64,7 @@
 
 .setting_pages{
     width: 100%;
+    left: 0px;
     display: flex;
     position: relative;
     transition: .5s;
