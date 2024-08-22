@@ -13,26 +13,45 @@
     overflow: hidden;
     /* 居中 */
     position: absolute;
-    top: 7px;
+    top: 0px;
     left: 50%;
     transform: translate(-50%, 0);
     z-index: 3;
     transition: .5s;
 }
 
-
+/* 设置页面导航菜单栏 */
 .setting_menu{
     width: 520px;
     display: flex;
     justify-content: center;
     align-items: center;
 }
-.setting_menu button{
-    margin: 0px;
+/* 导航栏按钮 */
+.setting_btn{
+    margin: 7px;
     height: 30px;
     color: #ffffff;
     flex: 1;
     border: 0px;
+    border-radius: 7px;
+    background: transparent;
+    transition: .5s;
+}
+
+.setting_btn:hover{
+    background-color: gray;
+    box-shadow: 0px 0px 7px rgb(0, 0, 0);
+}
+
+/* 上拉按钮 */
+#upBtn{
+    margin-right: 20px;
+    height: 20px;
+    color: #ffffff;
+    border: 1px solid white;
+    border-radius: 4px;
+    box-shadow: 0px 0px 5px white;
     background: transparent;
 }
 

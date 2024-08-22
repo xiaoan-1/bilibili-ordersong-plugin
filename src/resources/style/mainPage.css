@@ -11,9 +11,7 @@ body, html{
     width: 300px;
     height: 100%;
     margin: 0px auto;
-}
-.main:hover .setting{
-    height: 500px;
+    position: relative;
 }
 
 /* 顶层提示窗口样式 */

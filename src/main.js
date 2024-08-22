@@ -2,19 +2,14 @@ import { config } from "./components/config.js";
 import { danmu } from "./components/danmu.js";
 import { login } from "./components/login.js";
 import { player } from "./components/player.js";
+import { setting } from "./components/setting.js";
 
 
 window.onload = function (){
     
     // 设置界面导航
-    let elem_menu = document.getElementById('menu');
-    let elem_pages = document.getElementById('pages');
-    for (let i = 0; i < elem_menu.children.length; i++) {
-        const btn = elem_menu.children[i];
-        btn.onclick = () => {
-            elem_pages.style.left = -(520 * i) + "px";
-        }
-    }
+    setting.init();
+
     // 1、初始化点歌配置
     config.init();
 
