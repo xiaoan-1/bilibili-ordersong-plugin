@@ -230,10 +230,11 @@ export const wymusicServer = {
         let url = null;
         await axios({
             method: "get",
-            url: this.baseUrl + "/song/url",
+            url: this.baseUrl + "/song/url/v1",
             params: {
                 cookie: this.cookie,
-                id: songId
+                id: songId,
+                level: "standard",
             }
         }).then(function (resp) {
             if(resp.data.code < 0){
