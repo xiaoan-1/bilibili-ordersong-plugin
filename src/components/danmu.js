@@ -66,7 +66,7 @@ export const danmu = {
 
         }else if (danmuMsg == "切歌") { 
             // 切歌命令，触发切歌流程
-            if(player.orderList[0].uid == 0 || player.orderList[0].uid == userDanmu.uid || userDanmu.uid == this.uid){
+            if(player.orderList[0].uid == 0 || player.orderList[0].uid == userDanmu.uid || userDanmu.uid == this.adminId){
                 // 如果当前播放的是空闲歌单、用户歌曲，或者发送命令的是管理员，则播放下一首歌曲
                 player.playNext();
             }else{
