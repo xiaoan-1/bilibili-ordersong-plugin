@@ -16,7 +16,7 @@ export const danmu = {
     dServer: null,
 
     // 启动弹幕服务
-    init: function(){
+    init: async function(){
 
         // 读取配置文件
         publicMethod.readConfig(this);
@@ -24,8 +24,9 @@ export const danmu = {
         // 设置弹幕服务对象
         this.dServer = danmuServer.getPlatform(this.platform);
 
-        // 初始化弹幕服务器
-        this.dServer.init();
+        // *初始化弹幕服务器
+        await this.dServer.init();
+        
         this.adminId =  this.dServer.uid;
         this.dServer.danmuMessage = this.identifyDanmuCommand;
     },
