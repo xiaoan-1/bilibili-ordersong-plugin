@@ -13,7 +13,7 @@ export const danmu = {
     danmuPlatform: "bilibili",
 
     // 弹幕服务
-    dServer: null,
+    dServer: danmuServer.getPlatform("bilibili"),
 
     // 启动弹幕服务
     init: async function(){
@@ -22,8 +22,8 @@ export const danmu = {
         publicMethod.readConfig(this);
 
         // 设置弹幕服务对象
-        this.dServer = danmuServer.getPlatform(this.platform);
-
+        this.dServer = danmuServer.getPlatform(this.danmuPlatform);
+        
         // *初始化弹幕服务器
         await this.dServer.init();
         
@@ -44,7 +44,7 @@ export const danmu = {
             let keyword = danmuMsg.slice(2).trim();
             let platform = keyword.slice(0, 2); 
             // 根据平台通过API查询歌曲信息
-            let song = await musicServer.getPlatform(platform).getSongInfo(keyword);
+            let song = await musicServer.getPlatform(danmuPlatform).getSongInfo(keyword);
             
             if(!song){
                 publicMethod.pageAlert("挺好听的，虽然我没找到<(▰˘◡˘▰)>");
