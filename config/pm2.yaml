@@ -1,23 +1,23 @@
 # ecosystem.config.yaml
 apps:
   - name: NeteaseCloudMusicApi
-    script: ./musicServer.js
+    script: ./netease-music-api/server.js
     instances: 1
     exec_mode: fork
     watch: false
     max_memory_restart: 200M
 
   - name: bilibili-openStation
-    script: ./biliServer.js
+    script: ./bilibili-open-api/server.js
     instances: 1
     exec_mode: fork
     watch: false
-    max_memory_restart: 150M
+    max_memory_restart: 100M
 
 
   - name: bilibili-ordersong-plugin
-    script: ./webServer.js
+    script: ./app.js
     instances: 1
     exec_mode: fork
     watch: false
-    max_memory_restart: 200M
+    max_memory_restart: 100M

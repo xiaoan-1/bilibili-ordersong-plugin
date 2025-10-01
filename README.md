@@ -9,11 +9,15 @@ git clone https://github.com/xiaoan-1/bilibili-ordersong-plugin.git
 
 cd ./bilibili-ordersong-plugin
 
-pnpm i
+npm i
 
-pnpm install pm2 -g
+npm install pm2 -g
 
-pnpm run start
+# 后台启动web服务
+npm run start
+
+# 后台启动所有服务
+npm run all
 ```
 
 ## 观众指令
@@ -43,15 +47,6 @@ https://order.xiaoan.website?code={身份码}
 7. 超时限播时长：超过歌曲最大时长也可以点上，但放到指定时间自动切换
 8. 空闲歌单ID：目前只支持网易歌单，在网页中网址获取歌单ID，无人点歌时播放
 9. 历史歌单列表、历史点歌用户、历史点歌歌曲、黑名单，字面意思
-
-## 点歌面板
-![点歌界面](https://github.com/xiaoan-1/bilibili-ordersong-plugin/blob/main/img/panel.png)
-
-## 设置面板
-![设置面板1](https://github.com/xiaoan-1/bilibili-ordersong-plugin/blob/main/img/set1.png)
-
-## 提示信息
-![提示1](https://github.com/xiaoan-1/bilibili-ordersong-plugin/blob/main/img/tip1.png)
 
 ## 致谢
 ~~本插件用到的网易音乐API来源于Binaryify的[网易云音乐 Node.js API service](https://github.com/Binaryify/NeteaseCloudMusicApi)~~

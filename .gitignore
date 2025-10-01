@@ -1,5 +1,6 @@
-node_modules
-.vscode
+/node_modules
+/.vscode
 *.txt
-config/config.yaml
-src/webapi.js
+/pnpm-lock.yaml
+/config/config.yaml
+/src/webapi.js
