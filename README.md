@@ -2,6 +2,20 @@ b站直播姬点歌H5插件
 
 本插件用于bilibili直播姬提供给观众点歌的功能，音源来自网易音乐、QQ音乐
 
+## 部署
+
+```shell script
+git clone https://github.com/xiaoan-1/bilibili-ordersong-plugin.git
+
+cd ./bilibili-ordersong-plugin
+
+pnpm i
+
+pnpm install pm2 -g
+
+pnpm run start
+```
+
 ## 观众指令
 1. 点歌 + (平台) + 歌曲关键词，不带平台默认为网易云音乐（目前仅支持网易和QQ）
    - 开头两个字为“点歌”即可，无其他格式要求（例如：点歌起风了、点歌qq起风了）
@@ -14,11 +28,12 @@ b站直播姬点歌H5插件
 
 个人公益链接（若无法使用请自行搭建对应API服务）
 
-http://plugin.changsheng.space?code=您的直播身份码
+https://order.xiaoan.website?code={身份码}
 
-身份码获取：[直播中心](https://link.bilibili.com/p/center/index#/my-room/start-live)  ▶ 开始直播 ▶ 身份码。
+身份码获取：[直播中心](https://link.bilibili.com/p/center/index#/my-room/start-live)  ▶ 身份码
 
 ## 设置简介
+点击表头进入设置页面
 1. 网易二维码登录：点击对应登录即可弹出二维码，扫码即可
 2. QQ音乐cookie：请在QQ音乐网页端登录获取cookie，获取方式自行百度
 3. 管理员uid：个人的b站账号ID，可在个人主页网址获取或者直播姬头像详细信息

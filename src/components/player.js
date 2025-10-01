@@ -107,7 +107,7 @@ export const player = {
                         elem_other.style.top = (elem_other.offsetTop - 40) + "px";
                     }
                     // 缩减点歌表高度
-                    this.elem_orderList.style.height = (this.elem_orderList.clientHeight - 40) + "px"
+                    this.elem_orderList.style.height = (this.elem_orderList.offsetHeight - 40) + "px"
                 }, 800);
                 break;
             } 
@@ -158,7 +158,7 @@ export const player = {
         this.orderList.push(order);
         
         // 页面同步添加点歌项
-        this.elem_orderList.style.height = (this.elem_orderList.clientHeight + 40) + "px";
+        this.elem_orderList.style.height = (this.elem_orderList.offsetHeight + 40) + "px";
         // 延迟动画
         setTimeout(() =>{
             let tr = document.createElement('tr');

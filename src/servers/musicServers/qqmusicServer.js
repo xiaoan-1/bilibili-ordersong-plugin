@@ -3,7 +3,7 @@ import { publicMethod } from "../../utils/method.js";
 export const qqmusicServer = {
     
     // https://github.com/jsososo/QQMusicApi
-    baseUrl: "",
+    baseUrl: window.API_CONFIG.qqmusic_api_url,
 
     cookie: "",
 

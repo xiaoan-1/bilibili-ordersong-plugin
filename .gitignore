@@ -1,5 +1,5 @@
 node_modules
 .vscode
 *.txt
-package.json
-package-lock.json
+config/config.yaml
+src/webapi.js

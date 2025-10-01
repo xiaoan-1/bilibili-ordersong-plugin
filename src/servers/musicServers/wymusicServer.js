@@ -2,7 +2,7 @@ import { publicMethod } from "../../utils/method.js";
 export const wymusicServer = {
     
     // 服务器地址
-    baseUrl: "http://plugin.changsheng.space:3000",
+    baseUrl: window.API_CONFIG.netease_api_url,
 
     cookie: "",
     

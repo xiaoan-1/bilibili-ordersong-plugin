@@ -151,7 +151,7 @@ export const login = {
     // 获取登录信息
     getLoginInfo: async function(){
         let loginStatus = await this.mServer.getUserDetail();
-        if(loginStatus && loginStatus.code == 200){
+        if(loginStatus && loginStatus.code == 200 && loginStatus.account){
             // 获取当前cookie登录的手机号（隐藏信息）
             document.getElementById('userName').textContent = loginStatus.account.userName; 
             document.getElementById('userPhone').textContent = loginStatus.account.phone; 

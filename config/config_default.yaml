@@ -1,0 +1,13 @@
+#  项目秘钥
+access_key_id: ""
+    
+# 签名秘钥
+access_key_secred: ""
+
+# 服务端口号
+web_server_port: 8000
+bili_server_port: 3100
+wymusic_server_port: 3000
+qqmusic_server_port: 3300
+
+

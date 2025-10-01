@@ -2,7 +2,7 @@ import { publicMethod } from "../../../utils/method.js";
 
 export const server = {
 
-    baseUrl: "http://plugin.changsheng.space:3100",
+    baseUrl: window.API_CONFIG.bili_api_url,
     
     /* 项目启动APi
         @param code [主播身份码]
