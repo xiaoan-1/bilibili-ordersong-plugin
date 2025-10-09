@@ -50,5 +50,3 @@ https://order.xiaoan.website?code={身份码}
 
 ## 致谢
 ~~本插件用到的网易音乐API来源于Binaryify的[网易云音乐 Node.js API service](https://github.com/Binaryify/NeteaseCloudMusicApi)~~
-
-本插件用到的QQ音乐API来源于jsososo的[QQMusicApi](https://github.com/jsososo/QQMusicApi)

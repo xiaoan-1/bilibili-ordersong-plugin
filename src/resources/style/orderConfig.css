@@ -1,7 +1,0 @@
-/* 黑名单框 */
-.setting_order_page #userBlackList, #songBlackList{
-    font-weight: bolder;
-    border: 3px #000000 solid;
-    background: rgb(16, 20, 16);
-    transition: .5s;
-}

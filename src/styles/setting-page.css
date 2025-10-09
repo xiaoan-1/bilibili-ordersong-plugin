@@ -5,7 +5,6 @@
     padding: 0px;
     margin: 0px;
     color: #ffffff;
-    font-size: 21px;
     backdrop-filter: blur(2px) brightness(90%);
     background-color: rgba(126, 126, 126, 0.5);
     border-radius: 10px;
@@ -77,16 +76,19 @@
 
 /* 表格样式 */
 .setting table{
+    width: 100%;
     border-spacing: 20px 20px;
+    table-layout: fixed;
 }
 
 /* 表格行第一列元素 */
 .setting table tr td:nth-child(1){
-    width: 150px;
+    width: auto;
     font-weight: 500;
-    text-align: justify;
+    text-align: justify-all;
     text-align-last: justify;
 }
+
 /* 表格行第二列元素 */
 .setting table tr td:nth-child(2){
     width: 200px;
@@ -96,6 +98,7 @@
 
 /* 表格行第三列元素 */
 .setting table tr td:nth-child(3){
+    width: auto;
     text-align: center;
 }
 
@@ -122,15 +125,15 @@
 /* 选择框样式 */
 .setting table tr td select{
     width: 100%;
-    padding-top: 3px;
-    padding-bottom: 3px;
+    padding: 3px;
+    border: 1px solid grey;
+    border-radius: 3px;
     text-align: center;
     font-size: large;
     color: white;
     outline: none;
     overflow: auto;
     background: rgb(187, 187, 187);
-    border-radius: 3px;
     transition: .5s;
 }
 
@@ -173,5 +176,77 @@
 .setting table ul li{
     width: 100%;
     list-style-type: none;
+    transition: .5s;
+}
+
+/* -------------- 登录设置页样式 ------------ */
+.login_container {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+#loginForm {
+    width: 2000px;
+    padding: 5px;
+    display: flex;
+    position: relative;
+    left: 0px;
+    transition: .5s;
+}
+
+/* 网易二维码登录 */
+#loginForm .qr_login {
+    width: 400px;
+    /* 垂直布局，垂直居中 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* 二维码 */
+#loginForm .qr_login #qrImg {
+    width: 150px;
+    height: 150px;
+    border: 0px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 20px black;
+    background: transparent;
+    z-index: 4;
+    transition: .5s;
+}
+
+#loginForm .qr_login #qrImg:hover {
+    box-shadow: 0px 0px 20px white;
+}
+
+#loginForm .qr_login #qrButton {
+    margin: 0 auto;
+    margin-top: 10px;
+}
+
+/* qq Cookie登录 */
+#loginForm .ck_login{
+    width: 400px;
+    border-radius: 5px;
+    /* 垂直布局，垂直居中 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#loginForm .ck_login #ckText{
+    width: 300px;
+    height: 100%;
+    margin: 5px;
+    text-align-last: left;
+}
+
+/* -------------- 点歌设置页样式 ------------ */
+.setting_order_page #userBlackList,
+#songBlackList {
+    height: 105px;
+    background: rgb(16, 20, 16);
     transition: .5s;
 }
