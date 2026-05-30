@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 
 const app = express();
 
@@ -8,6 +9,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+console.log("===============正在启动服务器...=============");
 // ==================== 配置文件初始化 ====================
 // 如果运行时配置不存在，则从 default 目录拷贝
 if (!fs.existsSync('config/config.yaml')) {
@@ -57,7 +59,7 @@ if (isMountPath(webapiConfig.bili_api)) {
     // 设置服务
     const biliPath = webapiConfig.bili_api || '/bili-api';
     app.use(biliPath, biliRouter);
-    console.log(`B站API服务已挂载：http://localhost:${config.web_server_port}${webapiConfig.bili_api }`);
+    console.log(`B站开放平台API服务已挂载：http://localhost:${config.web_server_port}${webapiConfig.bili_api }`);
 } else {
     console.log(`B站API服务为独立服务：${webapiConfig.bili_api}`);
 }
@@ -86,7 +88,32 @@ if (isMountPath(webapiConfig.netease_api)) {
     console.log(`网易云音乐API服务为独立服务：${webapiConfig.netease_api}`);
 }
 
+// 获取本机所有局域网地址
+function getLocalIPs() {
+    const interfaces = os.networkInterfaces();
+    const ips = [];
+    for (const name of Object.keys(interfaces)) {
+        for (const iface of interfaces[name]) {
+            if (iface.family === 'IPv4' && !iface.internal) {
+                ips.push(iface.address);
+            }
+        }
+    }
+    return ips;
+}
+
 // 监听端口
-app.listen(config.web_server_port, () => {
-    console.log(`服务已启动：http://localhost:${config.web_server_port}`);
+const host = config.web_server_host || '0.0.0.0';
+const server = app.listen(config.web_server_port, host, () => {
+    console.log("=================服务已启动==================");
+    console.log(`本地地址：http://localhost:${config.web_server_port}`);
+    if (host === '0.0.0.0') {    
+        const ips = getLocalIPs();
+        for (const ip of ips) {
+            console.log(`网络地址：http://${ip}:${config.web_server_port}`);
+        }
+    } else {
+        console.log(`服务已启动：http://${host}:${config.web_server_port}`);
+    }
+    console.log("");
 });
