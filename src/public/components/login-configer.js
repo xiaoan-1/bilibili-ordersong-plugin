@@ -1,5 +1,5 @@
 import musicPlayer from "./music-player.js";
-import publicMethod from "../utils/public-method.js";
+import publicMethod from "../utils/common.js";
 import musicServer from "../services/musicServers/music-server.js";
 
 /**

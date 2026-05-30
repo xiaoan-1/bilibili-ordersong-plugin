@@ -1,5 +1,4 @@
 const crypto = require('crypto');
-const axios = require('axios');
 
 class Encrypt {
     constructor() {
@@ -54,26 +53,6 @@ class Encrypt {
     getMd5Content (str) {
         return crypto.createHash("md5").update(str).digest("hex")
     }
-
-    async test(){
-        let body = {
-            "code": "DFTJO4NTWVEO7",
-            "app_id": 1711708120386
-        };
-        await axios({
-            method: "post",
-            url: "https://live-open.biliapi.com/v2/app/start",
-            data:body,
-            headers: this.getEncodeHeader(body)
-        }).then(resp => {
-            console.log(resp.data);
-        }).catch(function(error){
-            console.log("???");
-        });  
-    }
 }
 
 module.exports = new Encrypt();
-
-
-

@@ -1,5 +1,5 @@
 import orderConfiger from "./order-configer.js";
-import publicMethod from "../utils/public-method.js";
+import publicMethod from "../utils/common.js";
 import musicServer from "../services/musicServers/music-server.js";
 
 /**
@@ -22,6 +22,12 @@ class MusicPlayer {
 
     // 歌曲播放时音量淡入，降低卡顿影响
     playFadeIn = null;
+
+    // 切歌锁，防止多次触发 playNext 导致列表错位
+    isSwitching = false;
+
+    // 待执行标记：切歌期间再次请求切歌时，标记为待执行，避免操作丢失
+    pendingNext = false;
 
     constructor() {
         this.addListener();
@@ -79,6 +85,9 @@ class MusicPlayer {
 
         if (!songurl) {
             publicMethod.pageAlert("获取歌曲链接失败，即将播放下一首...");
+            // 清除切歌锁，允许下一首播放
+            this.isSwitching = false;
+            this._flushPending();
             return;
         }
 
@@ -105,11 +114,28 @@ class MusicPlayer {
         /*----------------------------音量淡入-------------------------------*/
 
         // 播放
-        this.audio.play();
+        await this.audio.play().catch(err => {
+            console.warn("播放失败，可能需要用户先与页面交互：", err.message);
+        });
+
+        // 歌曲开始播放后，清除切歌锁，检查待执行
+        this.isSwitching = false;
+        this._flushPending();
     }
 
     // 播放下一首
-    playNext() {
+    async playNext() {
+        // 互斥锁：正在切歌时，标记为待执行而非丢弃
+        if (this.isSwitching) {
+            this.pendingNext = true;
+            return;
+        }
+        this.isSwitching = true;
+
+        // 停止当前播放，防止 ended/error 事件重复触发
+        this.audio.pause();
+        this.audio.removeAttribute('src');
+
         if (this.orderList.length > 0) {
             // 若点歌列表存在歌曲，则删除第一首
             this.orderList.shift();
@@ -135,13 +161,15 @@ class MusicPlayer {
 
         // 若点歌列表还有歌曲，则直接播放第一首
         if (this.orderList.length) {
-            this.play(this.orderList[0].song);
+            await this.play(this.orderList[0].song);
             return;
         }
 
         // 若点歌列表没有歌曲，则随机播放空闲歌单的歌曲            
         if (!this.idleSongList.length) {
             publicMethod.pageAlert("没有下一首可以放了>_<!");
+            this.isSwitching = false;
+            this._flushPending();
             return;
         }
 
@@ -156,7 +184,19 @@ class MusicPlayer {
         this.addOrder(this.idleSongList[this.idleIndex]);
 
         // 播放当前第一首歌曲
-        this.play(this.orderList[0].song)
+        await this.play(this.orderList[0].song);
+    }
+
+    // 检查并执行待处理的切歌请求
+    _flushPending() {
+        if (this.pendingNext) {
+            this.pendingNext = false;
+            // 当前正在播放用户点的歌（uid != 0），ended 的 playNext 已处理，无需再切
+            if (this.orderList.length > 0 && this.orderList[0].uid != 0) {
+                return;
+            }
+            this.playNext();
+        }
     }
 
     // 添加点歌对象

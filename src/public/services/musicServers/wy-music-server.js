@@ -1,7 +1,7 @@
 class WyMusicServer {
 
     // 服务器地址
-    baseUrl = window.API_CONFIG.netease_api_url;
+    baseUrl = window.API_CONFIG.netease_api;
 
     cookie = localStorage.getItem("wycookie");
 

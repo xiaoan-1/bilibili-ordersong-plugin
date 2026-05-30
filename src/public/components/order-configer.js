@@ -1,4 +1,4 @@
-import publicMethod from "../utils/public-method.js";
+import publicMethod from "../utils/common.js";
 
 /**
  * 点歌配置项

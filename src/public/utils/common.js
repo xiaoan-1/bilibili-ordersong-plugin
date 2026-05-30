@@ -53,4 +53,3 @@ export default class PublicMethod {
         return array;
     }
 }
-

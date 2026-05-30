@@ -1,7 +1,7 @@
 class QQMusicServer {
 
     // https://github.com/jsososo/QQMusicApi
-    baseUrl = window.API_CONFIG.qqmusic_api_url;
+    baseUrl = window.API_CONFIG.qqmusic_api;
 
     cookie = localStorage.getItem("qqcookie");
 

@@ -3,4 +3,5 @@
 *.txt
 /pnpm-lock.yaml
 /config/config.yaml
-/src/webapi.js
+/config/webapi.js
+/src/public/webapi.js
