@@ -3,7 +3,7 @@ import publicMethod from "../../utils/common.js";
 export default class BilibiliServer {
 
     // API基础地址
-    baseUrl = window.API_CONFIG.bili_api;
+    baseUrl = window.API_CONFIG.BASE_PATH + window.API_CONFIG.bili_api;
 
     // socket连接地址
     socketUrl = "";

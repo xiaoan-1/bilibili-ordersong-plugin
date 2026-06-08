@@ -31,8 +31,9 @@ const config = yaml.parse(configText);
 // 读取 webapi 配置
 const webapiConfig = require('./config/webapi.js');
 
-// 静态文件
-app.use(express.static(path.join(__dirname, 'src/public')));
+// 静态文件（挂载在 BASE_PATH 基础路径下）
+const BASE_PATH = webapiConfig.BASE_PATH || '/order';
+app.use(BASE_PATH, express.static(path.join(__dirname, 'src/public')));
 
 // ==================== 按需启动集成服务 ====================
 /**
@@ -58,8 +59,8 @@ if (isMountPath(webapiConfig.bili_api)) {
     encrypt.access_key_secred = config.access_key_secred || '';
     // 设置服务
     const biliPath = webapiConfig.bili_api || '/bili-api';
-    app.use(biliPath, biliRouter);
-    console.log(`B站开放平台API服务已挂载：http://localhost:${config.web_server_port}${webapiConfig.bili_api }`);
+    app.use(BASE_PATH + biliPath, biliRouter);
+    console.log(`B站开放平台API服务已挂载：http://localhost:${config.web_server_port}${BASE_PATH}${biliPath}`);
 } else {
     console.log(`B站API服务为独立服务：${webapiConfig.bili_api}`);
 }
@@ -67,8 +68,8 @@ if (isMountPath(webapiConfig.bili_api)) {
 // 网易云音乐 API
 if (isMountPath(webapiConfig.netease_api)) {
     const NeteaseCloudMusicApi = require('NeteaseCloudMusicApi');
-    const neteasePath = webapiConfig.netease_api || '/music-api';
-    app.use(neteasePath, async (req, res) => {
+    const neteasePath = webapiConfig.netease_api || '/netease_api';
+    app.use(BASE_PATH + neteasePath, async (req, res) => {
         try {
             let apiPath = req.path.replace(/^\//, '').replace(/\//g, '_');
             const apiFunc = NeteaseCloudMusicApi[apiPath];
@@ -83,7 +84,7 @@ if (isMountPath(webapiConfig.netease_api)) {
             res.status(500).json({ error: error.message });
         }
     });
-    console.log(`网易云音乐API服务已挂载：http://localhost:${config.web_server_port}${webapiConfig.netease_api}`);
+    console.log(`网易云音乐API服务已挂载：http://localhost:${config.web_server_port}${BASE_PATH}${neteasePath}`);
 } else {
     console.log(`网易云音乐API服务为独立服务：${webapiConfig.netease_api}`);
 }
@@ -106,14 +107,14 @@ function getLocalIPs() {
 const host = config.web_server_host || '0.0.0.0';
 const server = app.listen(config.web_server_port, host, () => {
     console.log("=================服务已启动==================");
-    console.log(`本地地址：http://localhost:${config.web_server_port}`);
+    console.log(`本地地址：http://localhost:${config.web_server_port}${BASE_PATH}`);
     if (host === '0.0.0.0') {    
         const ips = getLocalIPs();
         for (const ip of ips) {
-            console.log(`网络地址：http://${ip}:${config.web_server_port}`);
+            console.log(`网络地址：http://${ip}:${config.web_server_port}${BASE_PATH}`);
         }
     } else {
-        console.log(`服务已启动：http://${host}:${config.web_server_port}`);
+        console.log(`服务已启动：http://${host}:${config.web_server_port}${BASE_PATH}`);
     }
     console.log("");
 });

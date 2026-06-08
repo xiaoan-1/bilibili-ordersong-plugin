@@ -77,7 +77,7 @@ http://localhost:8000?code={身份码}
 
 **公益链接（若无法使用请自行搭建）：**
 
-> **[https://order.xiaoan.website?code={身份码}](https://order.xiaoan.website?code=123456)**
+> **[https://xiaoan.website/order?code={身份码}](https://xiaoan.website/order)**
 
 身份码获取：[开播设置（B站）](https://link.bilibili.com/p/center/index#/my-room/start-live) → 复制身份码
 
