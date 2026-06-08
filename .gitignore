@@ -5,3 +5,4 @@
 /config/config.yaml
 /config/webapi.js
 /src/public/webapi.js
+/logs
