@@ -67,8 +67,8 @@ export default class BilibiliServer {
             return;
         }
 
-        // 设置连接参数
-        this.uid = gameInfo.game_info.open_id;
+        // 设置连接参数（open_id 在新版接口中位于 anchor_info，兼容旧版 game_info）
+        this.uid = gameInfo.anchor_info.open_id || gameInfo.game_info.open_id;
         this.gameId = gameInfo.game_info.game_id;
         this.roomId = gameInfo.anchor_info.room_id;
         this.socketUrl = gameInfo.websocket_info.wss_link[2];
